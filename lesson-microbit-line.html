@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>micro:bit ライントレースで遊ぼう！</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700;900&family=Bebas+Neue&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --tech-blue: #0066CC;
+            --tech-cyan: #00A8CC;
+            --tech-dark: #001F3F;
+            --tech-gray: #2C3E50;
+            --tech-light: #ECF0F1;
+            --tech-accent: #FF6B35;
+            --paper-white: #F8F9FA;
+        }
+
+        body {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            background: var(--paper-white);
+            color: var(--tech-dark);
+            line-height: 1.8;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 102, 204, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 102, 204, 0.05) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 0 24px 120px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            padding: 56px 0 72px;
+            border-bottom: 3px solid var(--tech-blue);
+            margin-bottom: 72px;
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, transparent 100%);
+        }
+
+        .header-tag {
+            display: inline-block;
+            background: var(--tech-blue);
+            color: #fff;
+            padding: 6px 18px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 28px;
+            clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 100%, 12px 100%);
+        }
+
+        h1 {
+            font-size: clamp(48px, 8vw, 96px);
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 2px;
+            line-height: 0.92;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--tech-blue) 0%, var(--tech-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-subtitle {
+            font-size: 20px;
+            font-weight: 400;
+            color: var(--tech-gray);
+            letter-spacing: 4px;
+            margin-bottom: 32px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .header-description {
+            font-size: 16px;
+            color: var(--tech-gray);
+            max-width: 760px;
+        }
+
+        section {
+            margin-bottom: 80px;
+            position: relative;
+        }
+
+        .section-label {
+            position: absolute;
+            top: -36px;
+            left: -48px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 72px;
+            font-weight: 900;
+            color: rgba(0, 102, 204, 0.12);
+            pointer-events: none;
+        }
+
+        h2 {
+            font-size: 32px;
+            margin-bottom: 16px;
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        h3 {
+            font-size: 22px;
+            margin-bottom: 12px;
+            color: var(--tech-blue);
+        }
+
+        p {
+            margin-bottom: 16px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+
+        .info-card {
+            background: #fff;
+            border: 1px solid rgba(0, 102, 204, 0.12);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--tech-blue), var(--tech-cyan));
+            animation: gradientSlide 4s linear infinite;
+            background-size: 200% 100%;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--tech-dark);
+            color: #fff;
+            padding: 4px 10px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            font-weight: 700;
+            clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%);
+            margin-bottom: 12px;
+        }
+
+        .data-panel {
+            position: relative;
+            padding: 24px;
+            border: 1px solid rgba(0, 102, 204, 0.2);
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .data-panel::before {
+            content: attr(data-label);
+            position: absolute;
+            top: -12px;
+            left: 16px;
+            background: var(--tech-dark);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            padding: 4px 10px;
+        }
+
+        .timeline {
+            border-left: 2px solid rgba(0, 102, 204, 0.2);
+            margin-left: 12px;
+            padding-left: 32px;
+            display: grid;
+            gap: 40px;
+        }
+
+        .timeline-step {
+            position: relative;
+        }
+
+        .timeline-step::before {
+            content: attr(data-step);
+            position: absolute;
+            left: -64px;
+            top: 0;
+            background: var(--tech-dark);
+            color: #fff;
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 20px;
+            clip-path: polygon(50% 0%, 100% 26%, 82% 100%, 18% 100%, 0% 26%);
+        }
+
+        .timeline-step h3 {
+            margin-bottom: 8px;
+        }
+
+        .code-block {
+            position: relative;
+            background: #0C1220;
+            color: #ECF0F1;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            background: rgba(0, 168, 204, 0.18);
+            border-bottom: 1px solid rgba(236, 240, 241, 0.1);
+        }
+
+        .code-title {
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+
+        pre {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            padding: 20px;
+            white-space: pre;
+        }
+
+        .copy-hint {
+            font-size: 13px;
+            color: rgba(236, 240, 241, 0.8);
+            margin-top: 10px;
+        }
+
+        .copy-button {
+            background: transparent;
+            border: 1px solid rgba(236, 240, 241, 0.4);
+            color: #ECF0F1;
+            padding: 6px 12px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .copy-button:hover {
+            background: rgba(236, 240, 241, 0.08);
+        }
+
+        .course-grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+
+        .course-card {
+            background: #fff;
+            border: 1px solid rgba(0, 102, 204, 0.16);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-card::before {
+            content: attr(data-level);
+            position: absolute;
+            top: 20px;
+            right: -60px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 72px;
+            color: rgba(0, 102, 204, 0.08);
+            transform: rotate(15deg);
+        }
+
+        .cta-box {
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.1), rgba(0, 168, 204, 0.1));
+            border: 1px solid rgba(0, 102, 204, 0.2);
+            padding: 28px;
+            text-align: center;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--tech-blue);
+            color: #fff;
+            padding: 12px 24px;
+            letter-spacing: 1px;
+            font-weight: 700;
+            text-decoration: none;
+            clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 100%, 14px 100%);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 16px;
+        }
+
+        .cta-button:hover {
+            transform: translateX(6px);
+            box-shadow: 0 12px 24px rgba(0, 102, 204, 0.25);
+        }
+
+        .tips-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .tips-grid li {
+            list-style: none;
+            padding: 12px 16px;
+            border-left: 4px solid var(--tech-cyan);
+            background: rgba(0, 168, 204, 0.08);
+        }
+
+        figure {
+            margin: 24px 0;
+            text-align: center;
+            background: #fff;
+            border: 1px solid rgba(0, 102, 204, 0.15);
+            padding: 16px;
+        }
+
+        figure img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        figcaption {
+            font-size: 13px;
+            color: var(--tech-gray);
+            margin-top: 8px;
+        }
+
+        .work-card {
+            background: rgba(0, 168, 204, 0.08);
+            border: 1px solid rgba(0, 102, 204, 0.2);
+            padding: 18px 20px;
+            margin-top: 12px;
+        }
+
+        .work-card strong {
+            letter-spacing: 1px;
+            color: var(--tech-dark);
+        }
+
+        .step-list {
+            list-style: none;
+            counter-reset: prep-step;
+            display: grid;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .step-list li {
+            position: relative;
+            padding-left: 52px;
+            line-height: 1.6;
+        }
+
+        .step-list li::before {
+            counter-increment: prep-step;
+            content: counter(prep-step, decimal-leading-zero);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            background: var(--tech-dark);
+            color: #fff;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 18px;
+            clip-path: polygon(0 0, 100% 0, 86% 100%, 0 100%);
+        }
+
+        .prompt-box {
+            border: 1px solid rgba(0, 102, 204, 0.25);
+            background: rgba(0, 102, 204, 0.08);
+            padding: 18px 20px;
+            margin-top: 16px;
+        }
+
+        .prompt-box ul {
+            margin-top: 8px;
+            padding-left: 20px;
+        }
+
+        .question-box {
+            background: rgba(0, 31, 63, 0.08);
+            border: 1px solid rgba(0, 31, 63, 0.2);
+            padding: 20px 24px;
+            margin-top: 20px;
+        }
+
+        .question-box h4 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: var(--tech-dark);
+        }
+
+        .question-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .question-box li {
+            margin-bottom: 12px;
+            border-bottom: 1px dashed rgba(0, 31, 63, 0.3);
+            padding-bottom: 12px;
+        }
+
+        .question-box span {
+            display: inline-block;
+            width: 120px;
+            font-weight: 600;
+            color: var(--tech-blue);
+        }
+
+        .sensor-gallery {
+            align-items: stretch;
+        }
+
+        .sensor-card {
+            background: #fff;
+            border: 1px solid rgba(0, 102, 204, 0.15);
+            padding: 16px;
+            text-align: left;
+        }
+
+        .sensor-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin-bottom: 12px;
+            border: 1px solid rgba(0, 102, 204, 0.2);
+        }
+
+        .sensor-card figcaption {
+            font-size: 14px;
+            color: var(--tech-gray);
+            line-height: 1.6;
+        }
+
+        .sensor-card figcaption strong {
+            color: var(--tech-blue);
+        }
+
+        .course-images {
+            display: grid;
+            gap: 12px;
+            margin-top: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+
+        .course-images figure {
+            margin: 0;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 102, 204, 0.15);
+            padding: 10px;
+            text-align: center;
+        }
+
+        .course-images img {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .course-images figcaption {
+            font-size: 13px;
+            color: var(--tech-gray);
+            letter-spacing: 0.5px;
+        }
+
+        .custom-card {
+            border: 1px solid rgba(255, 107, 53, 0.4);
+            background: rgba(255, 107, 53, 0.08);
+            padding: 16px 20px;
+            margin-top: 14px;
+        }
+
+        .custom-card strong {
+            color: var(--tech-accent);
+            letter-spacing: 1px;
+        }
+
+        .custom-card ul {
+            margin-top: 8px;
+            padding-left: 18px;
+        }
+
+        .hint-card {
+            border: 1px solid rgba(0, 102, 204, 0.25);
+            background: rgba(0, 102, 204, 0.12);
+            padding: 14px 18px;
+            margin-top: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .hint-card strong {
+            color: var(--tech-dark);
+            letter-spacing: 1px;
+        }
+
+        details.advanced-snippet {
+            margin-top: 12px;
+        }
+
+        details.advanced-snippet .code-block {
+            margin-top: 12px;
+        }
+
+        .collab-card {
+            border: 1px solid rgba(0, 102, 204, 0.3);
+            background: rgba(0, 102, 204, 0.08);
+            padding: 18px 22px;
+            margin-top: 16px;
+        }
+
+        .collab-card h4 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--tech-dark);
+        }
+
+        .collab-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .collab-card li {
+            margin-bottom: 6px;
+        }
+
+        .course-steps {
+            list-style: none;
+            counter-reset: course-step;
+            display: grid;
+            gap: 28px;
+            margin-top: 20px;
+            padding: 0;
+        }
+
+        .course-step {
+            position: relative;
+            border: 1px solid rgba(0, 102, 204, 0.2);
+            background: #fff;
+            padding: 24px;
+        }
+
+        .course-step::before {
+            counter-increment: course-step;
+            content: 'STEP ' counter(course-step, decimal-leading-zero);
+            position: absolute;
+            top: -18px;
+            left: 16px;
+            background: var(--tech-dark);
+            color: #fff;
+            padding: 4px 10px;
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 2px;
+            font-size: 16px;
+        }
+
+        .course-step h4 {
+            margin-bottom: 8px;
+        }
+
+        .course-step-actions {
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--tech-gray);
+        }
+
+        .submission-panel {
+            margin-top: 32px;
+            border: 1px solid rgba(0, 102, 204, 0.25);
+            background: rgba(0, 102, 204, 0.08);
+            padding: 20px 24px;
+        }
+
+        .submission-panel form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .submission-panel input,
+        .submission-panel select {
+            padding: 8px 12px;
+            border: 1px solid rgba(0, 102, 204, 0.4);
+            background: #fff;
+            font-size: 14px;
+        }
+
+        .submission-panel button {
+            padding: 10px 18px;
+            background: var(--tech-accent);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .submission-panel button:hover {
+            opacity: 0.9;
+        }
+
+        .reload-button {
+            margin-top: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid var(--tech-blue);
+            color: var(--tech-blue);
+            font-size: 13px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .reload-button:hover {
+            background: rgba(0, 102, 204, 0.08);
+        }
+
+        .reload-button[disabled] {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .submission-message {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .scoreboard {
+            margin-top: 24px;
+            background: #fff;
+            border: 1px solid rgba(0, 102, 204, 0.2);
+            padding: 20px;
+        }
+
+        .scoreboard h4 {
+            margin-bottom: 12px;
+        }
+
+        .score-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 8px;
+        }
+
+        .score-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px dashed rgba(0, 102, 204, 0.2);
+            padding-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .leaderboard {
+            display: grid;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .leaderboard-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            background: rgba(0, 102, 204, 0.08);
+            border: 1px solid rgba(0, 102, 204, 0.15);
+        }
+
+        .leaderboard-card[data-level="basic"] {
+            background: rgba(0, 168, 204, 0.12);
+            border-color: rgba(0, 168, 204, 0.35);
+        }
+
+        .leaderboard-card[data-level="intermediate"] {
+            background: rgba(0, 102, 204, 0.12);
+            border-color: rgba(0, 102, 204, 0.35);
+        }
+
+        .leaderboard-card[data-level="advanced"] {
+            background: rgba(255, 107, 53, 0.12);
+            border-color: rgba(255, 107, 53, 0.35);
+        }
+
+        .leaderboard-card .rank-icon {
+            font-size: 24px;
+            line-height: 1;
+            width: 32px;
+            text-align: center;
+        }
+
+        .leaderboard-card .rank-body {
+            flex: 1;
+        }
+
+        .leaderboard-card .rank-body strong {
+            display: block;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .leaderboard-card .rank-meta {
+            font-size: 12px;
+            color: var(--tech-gray);
+        }
+
+        .leaderboard-empty {
+            font-size: 14px;
+            color: var(--tech-gray);
+        }
+
+        .recent-title {
+            margin-top: 20px;
+            margin-bottom: 8px;
+            font-size: 16px;
+            color: var(--tech-dark);
+        }
+
+        details summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--tech-blue);
+        }
+
+        .script-snippet {
+            background: #0C1220;
+            color: #ECF0F1;
+            padding: 16px;
+            margin-top: 12px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+
+        @keyframes gradientSlide {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+
+        @media (max-width: 720px) {
+            .section-label {
+                left: -20px;
+                font-size: 56px;
+            }
+
+            header {
+                padding: 40px 0 56px;
+                margin-bottom: 56px;
+            }
+
+            .timeline {
+                margin-left: 0;
+                padding-left: 24px;
+            }
+
+            .timeline-step::before {
+                left: -56px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-tag">MICRO:BIT LAB SESSION</div>
+            <h1>micro:bit ライントレースで遊ぼう！</h1>
+            <div class="header-subtitle">Line Sensor Robotics × Creative Programming</div>
+            <p class="header-description">
+                RoboBase LineSensor を使って、センサーの値を読み取りながらロボットを走らせるステップアップ型ワーク。<br>                センサー → 条件分岐 → モーター制御の流れを体験し、自分たちの工夫でコースを攻略しよう。
+            </p>
+        </header>
+
+        <section>
+            <div class="section-label">01</div>
+            <h2>授業の全体像</h2>
+            <div class="grid grid-3">
+                <div class="info-card">
+                    <span class="badge">LEVEL</span>
+                    <h3>プログラミング上級編</h3>
+                    <p>センサー制御とロボティクスを組み合わせ、条件分岐の応用まで体験するワークショップ設計です。</p>
+                </div>
+                <div class="info-card">
+                    <span class="badge">SESSION</span>
+                    <h3>ステップ別レッスン</h3>
+                    <p>導入 → 制御基礎 → ライントレース完成 → 応用チャレンジの流れで、どの時間割にも合わせやすい構成にできます。</p>
+                </div>
+                <div class="info-card">
+                    <span class="badge">KIT</span>
+                    <h3>使用するもの</h3>
+                    <p>Switch Education RoboBase LineSensor、micro:bit、本資料のコード例、配布モジュール <code>haizen.py</code>。班の進度に合わせて差し替え可能です。</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">02</div>
+            <h2>最初に準備するもの</h2>
+            <div class="grid grid-2">
+                <div class="data-panel" data-label="CHECKLIST">
+                    <h3>班でそろえるもの</h3>
+                    <ul>
+                        <li>micro:bit 本体 + USB ケーブル</li>
+                        <li>RoboBase LineSensor ボード（左右モーター付き）</li>
+                        <li>配布済みファイル：<code>haizen.py</code>（Google Drive からダウンロード）</li>
+                    </ul>
+                </div>
+                <div class="data-panel" data-label="FLOW">
+                    <h3>授業のながれ</h3>
+                    <ol>
+                        <li>導入デモで自動走行のイメージをつかむ</li>
+                        <li>モーター制御とセンサー確認を段階的に実装</li>
+                        <li>条件分岐を組み合わせてライントレース完成</li>
+                        <li>初級 → 中級 → 上級コースへ順にチャレンジ</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="prompt-box">
+                <h3>micro:bit Python Editor への読み込み手順</h3>
+                <p>事前に Google Drive フォルダー「実際にはGoogleドライブに入っているプログラム」から <code>haizen.py</code> をダウンロードしておきます。各ステップのコードはこの資料からコピーして班ごとに育てましょう。</p>
+                <ul class="step-list">
+                    <li>micro:bit を PC に接続し、<a href="https://python.microbit.org/v/3" target="_blank" rel="noopener noreferrer">micro:bit Python Editor</a> を開く。</li>
+                    <li>画面右上の「プロジェクト」アイコン → 「ファイルを読み込む」から <code>haizen.py</code> をアップロード。</li>
+                    <li>上部の名前を付けて、まずは下の STEP 1 コードを貼り付けて保存（Save）。</li>
+                    <li>各ステップの改良コードに書き換えたら、「ダウンロード（Save）」で micro:bit に入れる</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">03</div>
+            <h2>フォトリフレクターのしくみ</h2>
+            <p>
+                ライントレースの要は、床の色を読み取るフォトリフレクターです。赤外線 LED が照射し、反射した光の強さをセンサーが数値化します。
+                白い線は反射が強くて値が小さく、黒い線は吸収して値が大きくなります。
+            </p>
+            <div class="grid grid-3 sensor-gallery">
+                <figure class="sensor-card">
+                    <img src="https://drive.google.com/thumbnail?id=120QFv7AjGcfCm_eFfps92llczhAGSrHU&sz=w1000" alt="赤外線LEDとフォトリフレクターの構造図">
+                    <figcaption><strong>赤外線を照射</strong><br>赤外線LEDが床に光を当て、受光部がその反射を読み取ります。まずはどこに光が当たっているかを確認しよう。</figcaption>
+                </figure>
+                <figure class="sensor-card">
+                    <img src="https://drive.google.com/thumbnail?id=1v9MJlOy_F2LrnBKrdbUGmogavsmLcYrF&sz=w1000" alt="白と黒の面で異なる反射をするフォトリフレクターの説明図">
+                    <figcaption><strong>反射の違いをチェック</strong><br>白い面は光を強く反射して値が小さく、黒いラインは吸収して値が大きくなります。ライン上と床で数値を比べよう。</figcaption>
+                </figure>
+                <figure class="sensor-card">
+                    <img src="https://drive.google.com/thumbnail?id=1ZJgwmgvFGPoSDjc9Zi6ja5ZeQNcvichm&sz=w1000" alt="ラインセンサーのトリマー調整写真">
+                    <figcaption><strong>トリマーで微調整</strong><br>隣のトリマーを少しずつ回すと感度が変わります。時計回りで鈍く、反時計回りで敏感になります。</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">04</div>
+            <h2>ステップアップで実装しよう</h2>
+            <div class="timeline">
+                <div class="timeline-step" data-step="01">
+                    <h3>モーターを自由に動かす</h3>
+                    <p>モーターを動かして「前に進む／止まる」の基本操作を体験します。左右モーターを同じ速さで回すと直進することを確認しよう。</p>
+                    <div class="work-card">
+                        <strong>ワーク</strong>
+                        <ul>
+                            <li>Aボタンで前進、Bボタンで停止できるか確かめる。</li>
+                            <li>下のコードにある <code>FORWARD_SPEED</code> に好きな数値を入れて試す。</li>
+                            <li>スピードの数字を 30 → 60 → 90 と変えて走りの違いを観察。</li>
+                            <li>車体の揺れや音の変化をメモし、後の調整のヒントにする。</li>
+                        </ul>
+                    </div>
+                    <div class="code-block" id="step1">
+                        <div class="code-header">
+                            <span class="code-title">STEP 1 | motor-control.py</span>
+                            <button class="copy-button" data-target="code-step1">COPY</button>
+                        </div>
+                        <pre id="code-step1"><code>from microbit import *
+from haizen import *
+
+LEFT_SPEED = 0   # ← 左タイヤの速さ（例: 45）
+RIGHT_SPEED = 0  # ← 右タイヤの速さ（例: 45）
+
+motor = WheelMotor()
+
+while True:
+    if button_a.is_pressed():
+        motor.set_speed(LEFT_SPEED, RIGHT_SPEED)  # 左右それぞれの値で前進
+    elif button_b.is_pressed():
+        motor.stop()                                     # 停止
+    sleep(100)
+</code></pre>
+                        <div class="copy-hint">これをコピーして micro:bit に転送しよう！</div>
+                    </div>
+                    <div class="custom-card">
+                        <strong>カスタマイズ例</strong>
+                        <ul>
+                            <li><code>LEFT_SPEED</code> と <code>RIGHT_SPEED</code> を 10〜90 の範囲で調整し、最も直進しやすい組み合わせを探す。</li>
+                            <li>LED で状態を表示する関数を追加し、前進中は矢印、停止中は「STOP」を表示。</li>
+                            <li>ボタン B の代わりに傾き <code>accelerometer.is_gesture('face down')</code> で停止する等のトリガーを考える。</li>
+                        </ul>
+                    </div>
+                    <div class="hint-card">
+                        <strong>推奨ヒント</strong><br>
+                        まずは左右とも 45〜55 の同じ値にして直進チェック。まっすぐ進まない場合は片方ずつ ±5 ずつ変えて最適なバランスを探そう。
+                    </div>
+                </div>
+                <div class="timeline-step" data-step="02">
+                    <h3>黒い線の上で止まる</h3>
+                    <p>ラインセンサーで白と黒を判定し、黒線を見つけたら停止させます。閾値 <code>th</code> を決めて、値がその数字以上なら黒と判断しましょう。</p>
+                    <div class="work-card">
+                        <strong>ワーク</strong>
+                        <ul>
+                            <li>白い面と黒い線で <code>pin1.read_analog()</code> の値をそれぞれ3回ずつ測る。</li>
+                            <li><code>FORWARD_LEFT_SPEED</code> / <code>FORWARD_RIGHT_SPEED</code> に直進で安定した値を書く。</li>
+                            <li>平均値から <code>th</code> を決め、下のコードの数字を書き換える。</li>
+                            <li>黒線の上にセンサーを置いたときに必ず止まるかテストする。</li>
+                        </ul>
+                    </div>
+                    <div class="code-block" id="step2">
+                        <div class="code-header">
+                            <span class="code-title">STEP 2 | stop-on-black.py</span>
+                            <button class="copy-button" data-target="code-step2">COPY</button>
+                        </div>
+                        <pre id="code-step2"><code>from microbit import *
+from haizen import *
+
+motor = WheelMotor()
+FORWARD_LEFT_SPEED = 0   # ← 白い床で動かすときの左タイヤ（例: 45）
+FORWARD_RIGHT_SPEED = 0  # ← 白い床で動かすときの右タイヤ（例: 45）
+THRESHOLD = 0            # ← 白と黒を分ける境界（測った平均値を入力）
+
+while True:
+    sensor_value = pin1.read_analog()
+    # 黒: sensor_value >= THRESHOLD
+    # 白: sensor_value < THRESHOLD
+    if sensor_value >= THRESHOLD:
+        motor.stop()
+    else:
+        motor.set_speed(FORWARD_LEFT_SPEED, FORWARD_RIGHT_SPEED)
+    sleep(100)
+</code></pre>
+                        <div class="copy-hint">これをコピーして、黒いテープの上で止まるか試そう！</div>
+                    </div>
+                    <div class="custom-card">
+                        <strong>カスタマイズ例</strong>
+                        <ul>
+                            <li>判定結果を <code>display.show()</code> で表示し、黒のときは「■」、白のときは「□」を出す。</li>
+                            <li><code>th</code> をボタン操作で増減できるようにし、環境が変わっても素早く調整できるようにする。</li>
+                            <li>停止時に短い音を鳴らすなど、判定に気付きやすいフィードバックを追加する。</li>
+                        </ul>
+                    </div>
+                    <div class="hint-card">
+                        <strong>推奨ヒント</strong><br>
+                        室内では白い床が 100〜250、黒線が 400〜600 付近になることが多いです。THRESHOLD はその中間（例: 280〜350）を目安に設定。左右のスピードは Step 1 で安定した値をそのまま利用しましょう。
+                    </div>
+                    <div class="collab-card">
+                        <h4>ハドルタイム：他の班と情報共有しよう</h4>
+                        <ul>
+                            <li>自分たちの <code>th</code> の値と、その設定でうまくいった／いかなかった理由を共有。</li>
+                            <li>他班のアイデアで試したいものを1つ決め、戻ったら実験してみる。</li>
+                            <li>共有した内容はワークシートやノートにまとめ、次のステップで改善点を確認。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="timeline-step" data-step="03">
+                    <h3>黒線の上にある時に進む</h3>
+                    <p>条件分岐を反転させて、黒線を追いかける動きに挑戦します。黒線の上だけ前進し、それ以外では停止するようにしよう。</p>
+                    <div class="work-card">
+                        <strong>ワーク</strong>
+                        <ul>
+                            <li>Step 2 で決めた <code>th</code> の値をそのまま利用する。</li>
+                            <li><code>FOLLOW_LEFT_SPEED</code> / <code>FOLLOW_RIGHT_SPEED</code> に自分たちの速さを書き込む。</li>
+                            <li>センサーを左右に動かし、黒線から外れたらすぐ止まるか観察。</li>
+                            <li>止まるまでに時間がかかる場合は <code>sleep()</code> の数字を 50 などに短くする。</li>
+                        </ul>
+                    </div>
+                    <div class="code-block" id="step3">
+                        <div class="code-header">
+                            <span class="code-title">STEP 3 | follow-on-black.py</span>
+                            <button class="copy-button" data-target="code-step3">COPY</button>
+                        </div>
+                        <pre id="code-step3"><code>from microbit import *
+from haizen import *
+
+motor = WheelMotor()
+FOLLOW_LEFT_SPEED = 0   # ← 黒線の上を進ませる左タイヤ（例: 45〜55）
+FOLLOW_RIGHT_SPEED = 0  # ← 黒線の上を進ませる右タイヤ（例: 45〜55）
+THRESHOLD = 0     # ← Step 2 で見つけた境界値を入力
+
+while True:
+    sensor_value = pin1.read_analog()
+    if sensor_value >= THRESHOLD:
+        motor.set_speed(FOLLOW_LEFT_SPEED, FOLLOW_RIGHT_SPEED)  # 黒線上の時だけ前進
+    else:
+        motor.stop()                                 # それ以外は停止
+    sleep(100)
+</code></pre>
+                        <div class="copy-hint">黒線の上にセンサーを滑らせながら挙動をチェックしよう！</div>
+                    </div>
+                    <div class="custom-card">
+                        <strong>カスタマイズ例</strong>
+                        <ul>
+                            <li>黒線の幅に合わせて左モーターと右モーターの速度を変え、バランスよく進むように調整する。</li>
+                            <li>線から外れたときに LED を点滅させ、操縦者がすぐに気付けるようにする。</li>
+                            <li>黒線検出後に一定時間だけ進み、その後ゆっくり停止するようなソフトブレーキを追加する。</li>
+                        </ul>
+                    </div>
+                    <div class="hint-card">
+                        <strong>推奨ヒント</strong><br>
+                        左右で値を変えると黒線の中央に戻りにくくなることも。まずは同じ値で試し、外れやすい方向があれば反対側を +5 してみよう。スキップしがちな場合は sleep を 60 → 40 → 20ms と短くして反応を早くすると効果的です。
+                    </div>
+                </div>
+                <div class="timeline-step" data-step="04">
+                    <h3>黒い線に沿って動かす（ライン追従）</h3>
+                    <p>センサーを2つ使って右左の状態を判定し、方向を調整しながら走ります。判定の順番を声に出しながら確認するとまとまりやすいです。</p>
+                    <div class="work-card">
+                        <strong>ワーク</strong>
+                        <ul>
+                            <li>pin1 に左センサー、pin2 に右センサーを接続し直して確認。</li>
+                            <li>コード冒頭の <code>BASE_SPEED</code> や <code>TURN_FAST</code> などを自分たちの値に設定。</li>
+                            <li>4つの組み合わせ（白白／黒白／白黒／黒黒）を声に出して説明。</li>
+                            <li>コースを半周させ、うまく曲がれない場所に印を付ける。</li>
+                        </ul>
+                    </div>
+                    <div class="code-block" id="step4">
+                        <div class="code-header">
+                            <span class="code-title">STEP 4 | line-trace.py</span>
+                            <button class="copy-button" data-target="code-step4">COPY</button>
+                        </div>
+                        <pre id="code-step4"><code># Imports go at the top
+from microbit import *
+from haizen import *
+import music
+
+motor = WheelMotor()
+
+STRAIGHT_LEFT_SPEED = 0   # ← 直進時の左タイヤ（例: 45）
+STRAIGHT_RIGHT_SPEED = 0  # ← 直進時の右タイヤ（例: 45）
+TURN_LEFT_INNER_SPEED = 0   # ← 左折時の左タイヤ（例: 30〜40）
+TURN_LEFT_OUTER_SPEED = 0   # ← 左折時の右タイヤ（例: 55〜60）
+TURN_RIGHT_INNER_SPEED = 0  # ← 右折時の右タイヤ（例: 30〜40）
+TURN_RIGHT_OUTER_SPEED = 0  # ← 右折時の左タイヤ（例: 55〜60）
+THRESHOLD = 0               # ← 左右どちらも測って決めた境界値
+
+
+table_counter = 0
+target_table = 1
+
+display.show(table_counter)
+
+def trace_line():
+    sensor1 = pin1.read_analog()
+    sensor2 = pin2.read_analog()
+
+    if sensor1 < THRESHOLD and sensor2 < THRESHOLD:      # 白 白
+        motor.set_speed(STRAIGHT_LEFT_SPEED, STRAIGHT_RIGHT_SPEED)
+    elif sensor1 >= THRESHOLD and sensor2 < THRESHOLD:   # 黒 白（左側が黒）
+        motor.set_speed(TURN_LEFT_INNER_SPEED, TURN_LEFT_OUTER_SPEED)
+    elif sensor1 < THRESHOLD and sensor2 >= THRESHOLD:   # 白 黒（右側が黒）
+        motor.set_speed(TURN_RIGHT_OUTER_SPEED, TURN_RIGHT_INNER_SPEED)
+    else:                                                # 黒 黒（ゴールライン）
+        motor.stop()
+
+while True:
+    # 線に沿って進む
+    trace_line()
+</code></pre>
+                        <div class="copy-hint">完成したら黒いコースで連続走行をテストしよう！</div>
+                    </div>
+                    <div class="custom-card">
+                        <strong>カスタマイズ例</strong>
+                        <ul>
+                            <li><code>STRAIGHT_LEFT_SPEED</code> などの定数をコーナーごとに保存し、最適な旋回バランスを探す。</li>
+                            <li>ゴール時に音や表示を変える関数を追加し、ラップ回数を <code>table_counter</code> で管理する。</li>
+                            <li>ラインを見失ったとき用にバック走行やスピン動作を組み込むなど、復帰アルゴリズムを考える。</li>
+                        </ul>
+                    </div>
+                    <div class="hint-card">
+                        <strong>推奨ヒント</strong><br>
+                        まずは直進と同じ速さ（45〜50）からスタートし、内側を -10、外側を +10 すると直角ターンを曲がりやすくなります。ラインが細いときは差を大きく、太いときは差を小さく調整しましょう。
+                    </div>
+                    <div class="hint-card">
+                        <strong>コツ：カーブ攻略</strong><br>
+                        右直角：右センサーが黒を見つけたら <code>TURN_RIGHT_INNER_SPEED</code> をさらに -5 して減速。<br>
+                        左直角：左センサーが黒を見つけたら <code>TURN_LEFT_OUTER_SPEED</code> を +5 して素早く外側を回す。<br>
+                        鋭角カーブ：黒を検知したら一瞬停止 → 0.1 秒だけ外側モーターを速く回して抜ける（Step 6 の sharp-turn も参考に）。
+                    </div>
+                    <details class="advanced-snippet" style="margin-top: 12px;">
+                        <summary>別の書き方（左右同じ値でシンプルにしたい場合）</summary>
+                        <div class="script-snippet">
+<code>THRESHOLD = 200
+BASE_SPEED = 50
+TURN_FAST = BASE_SPEED + 10
+TURN_SLOW = BASE_SPEED - 15
+
+if sensor1 < THRESHOLD and sensor2 < THRESHOLD:
+    motor.set_speed(BASE_SPEED, BASE_SPEED)
+elif sensor1 >= THRESHOLD and sensor2 < THRESHOLD:
+    motor.set_speed(TURN_SLOW, TURN_FAST)
+elif sensor1 < THRESHOLD and sensor2 >= THRESHOLD:
+    motor.set_speed(TURN_FAST, TURN_SLOW)
+else:
+    motor.stop()</code>
+                        </div>
+                    </details>
+                </div>
+
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">05</div>
+            <h2>ライントレースコースに挑戦</h2>
+            <p>配布された PDF には初級・中級・上級コースが掲載されています。順番にクリアしながら、走り方を工夫してみましょう。</p>
+            <ol class="course-steps">
+                <li class="course-step">
+                    <h4>コース1-2｜ウォームアップ</h4>
+                    <p>ゆるやかなカーブと直線で、センサーの位置合わせとスピード調整を確認するフェーズ。班でベストな速度と閾値を決めよう。</p>
+                    <div class="course-images">
+                        <figure>
+                            <img src="https://drive.google.com/thumbnail?id=1hKHSaTZIGXWFgZ10RAz6w-9BfzsJ5n3m&sz=w1000" alt="ライントレース初級コース1">
+                            <figcaption>コース1｜基本カーブ</figcaption>
+                        </figure>
+                        <figure>
+                            <img src="https://drive.google.com/thumbnail?id=1qc7qLnxlFJqgjzr8oHRWyadCFXxaRyFy&sz=w1000" alt="ライントレース初級コース2">
+                            <figcaption>コース2｜ゆるいS字</figcaption>
+                        </figure>
+                    </div>
+                    <div class="course-step-actions">
+                        <strong>クリア条件:</strong> 2周連続でラインを外れずに完走。<br><strong>共有ポイント:</strong> 走行が安定した速度と <code>th</code> の値を記録し、次の班と交換しよう。
+                    </div>
+                </li>
+                <li class="course-step">
+                    <h4>コース3-4｜テクニカル調整</h4>
+                    <p>直角ターンやジグザグで旋回ロジックを磨きます。減速ロジックや左右のスピード差をテストし、外れたときの復帰方法も検討。</p>
+                    <div class="course-images">
+                        <figure>
+                            <img src="https://drive.google.com/thumbnail?id=1uVmqNDSJLyhGVr7A92y0Me3ag51PTmBa&sz=w1000" alt="ライントレース中級コース3">
+                            <figcaption>コース3｜L字ターン</figcaption>
+                        </figure>
+                        <figure>
+                            <img src="https://drive.google.com/thumbnail?id=1ZsxQShhm-nh_-r5IHqqfTQi9paGzynUj&sz=w1000" alt="ライントレース中級コース4">
+                            <figcaption>コース4｜ジグザグ</figcaption>
+                        </figure>
+                    </div>
+                    <div class="course-step-actions">
+                        <strong>クリア条件:</strong> コース3・4をそれぞれ1周ずつ完走。<br><strong>共有ポイント:</strong> 曲がり角でうまくいったパラメータ（速度・待ち時間など）を共有メモに残して交換する。
+                    </div>
+                </li>
+                <li class="course-step">
+                    <h4>コース5-7｜チャレンジモード</h4>
+                    <p>鋭角ターンと細い通路で最終調整。ゴール演出や周回カウンタを組み込み、オリジナルの改良を完成させよう。</p>
+                    <div class="course-images">
+                        <figure>
+                            <img src="https://drive.google.com/thumbnail?id=1dgwnV3R89a6BX-bLh1IAUgPuohk2kZ1i&sz=w1000" alt="ライントレース上級コース5">
+                            <figcaption>コース5｜ヘアピン連続</figcaption>
+                        </figure>
+                        <figure>
+                            <img src="https://drive.google.com/thumbnail?id=1j52pDW2ao58RDKKxZoznAUIE_iiwwQTJ&sz=w1000" alt="ライントレース上級コース6">
+                            <figcaption>コース6｜狭い通路</figcaption>
+                        </figure>
+                        <figure>
+                            <img src="https://drive.google.com/thumbnail?id=1FROyxMxWhorbL-ddylmzwGM39GcAIqYe&sz=w1000" alt="ライントレース上級コース7">
+                            <figcaption>コース7｜最終チャレンジ</figcaption>
+                        </figure>
+                    </div>
+                    <div class="course-step-actions">
+                        <strong>クリア条件:</strong> 任意のコースを選び、改良ポイントを1つ以上組み込んだ状態で完走。<br><strong>共有ポイント:</strong> ゴール演出や改良コードを他班と交換し、互いの工夫をフィードバックし合う。
+                    </div>
+                </li>
+            </ol>
+            <div class="submission-panel">
+                <h3>クリア報告を送信しよう</h3>
+                <p>班名とクリアしたコース番号を入力して送信すると、Google スプレッドシートに自動記録されます。URL は Web アプリとして公開した Apps Script のものに差し替えてください。</p>
+                                <form id="clear-form">
+                    <label for="course-select">コース番号</label>
+                    <select id="course-select" name="course" required>
+                        <option value="">選択してください</option>
+                        <option value="1">コース1</option>
+                        <option value="2">コース2</option>
+                        <option value="3">コース3</option>
+                        <option value="4">コース4</option>
+                        <option value="5">コース5</option>
+                        <option value="6">コース6</option>
+                        <option value="7">コース7</option>
+                    </select>
+                    <label for="group-name">グループ名</label>
+                    <input type="text" id="group-name" name="group" placeholder="例：A班" required>
+                    <button type="submit">CLEAR! を送信</button>
+                </form>
+                <div class="submission-message" id="submission-message"></div>
+                <div class="scoreboard" id="scoreboard">
+                    <h4>クリアランキング</h4>
+                    <button type="button" class="reload-button" id="reload-button">最新のログを取得</button>
+                    <div class="leaderboard" id="leaderboard">
+                        <p class="leaderboard-empty">読み込み中...</p>
+                    </div>
+                    <h5 class="recent-title">最新ログ</h5>
+                    <ul class="score-list" id="score-list">
+                        <li>読み込み中...</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">06</div>
+            <h2>改良アイデア &amp; サンプル調整</h2>
+            <div class="grid grid-2">
+                <div class="info-card">
+                    <h3>閾値を動的に変える</h3>
+                    <p>教室の明るさが変わるとセンサーの反応も変わります。ゴール直前だけ閾値を下げるなど、状況に合わせてみましょう。</p>
+                    <details class="advanced-snippet">
+                        <summary>コードを見る（閾値の自動調整）</summary>
+                        <div class="code-block" id="adjust">
+                            <div class="code-header">
+                                <span class="code-title">TWEAK | adaptive-threshold.py</span>
+                                <button class="copy-button" data-target="code-adjust">COPY</button>
+                            </div>
+                            <pre id="code-adjust"><code>from microbit import *
+from haizen import *
+
+motor = WheelMotor()
+base = 320
+boost = 40
+
+while True:
+    left = pin1.read_analog()
+    right = pin2.read_analog()
+    threshold = base
+    if button_a.is_pressed():
+        threshold = base + boost
+    if left &lt; threshold and right &lt; threshold:
+        motor.set_speed(55, 55)
+    elif left &gt;= threshold:
+        motor.set_speed(-10, 60)
+    elif right &gt;= threshold:
+        motor.set_speed(60, -10)
+    sleep(20)
+</code></pre>
+                        </div>
+                    </details>
+                </div>
+                <div class="info-card">
+                    <h3>旋回にメリハリをつける</h3>
+                    <p>カーブ入口で一瞬停止 → 再加速するとシャープなターンになります。sleep の時間は短め（50〜120ms）で試しましょう。</p>
+                    <details class="advanced-snippet">
+                        <summary>コードを見る（停止→再加速の例）</summary>
+                        <div class="code-block" id="curve">
+                            <div class="code-header">
+                                <span class="code-title">TWEAK | sharp-turn.py</span>
+                                <button class="copy-button" data-target="code-curve">COPY</button>
+                            </div>
+                            <pre id="code-curve"><code>from microbit import *
+from haizen import *
+
+motor = WheelMotor()
+THRESHOLD = 330
+
+while True:
+    left = pin1.read_analog()
+    right = pin2.read_analog()
+
+    if left &gt;= THRESHOLD and right &lt; THRESHOLD:
+        motor.stop()
+        sleep(80)
+        motor.set_speed(-30, 70)
+    elif left &lt; THRESHOLD and right &gt;= THRESHOLD:
+        motor.stop()
+        sleep(80)
+        motor.set_speed(70, -30)
+    elif left &lt; THRESHOLD and right &lt; THRESHOLD:
+        motor.set_speed(55, 55)
+    else:
+        motor.stop()
+    sleep(20)
+</code></pre>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">07</div>
+            <h2>応用編：無線コントローラーで操る</h2>
+            <p>もう1台の micro:bit をコントローラーにして、無線で左右や前進の指示を送ります。班で役割を決め、送信側と受信側をそれぞれテストしよう。</p>
+            <div class="work-card">
+                <strong>ワーク</strong>
+                <ul>
+                    <li>送信側と受信側に分かれてコードを書き込み、同じ <code>group</code> 番号に設定する。</li>
+                    <li>A＝左折、B＝右折、A+B＝前進など、どの記号で指示を送るか班で話し合う。</li>
+                    <li>遠くから送ったときの反応や遅れ、電波が届かない範囲を記録する。</li>
+                </ul>
+            </div>
+            <div class="grid grid-2" style="margin-top: 24px;">
+                <div>
+                    <div class="code-block" id="radio-send">
+                        <div class="code-header">
+                            <span class="code-title">RADIO | controller-send.py</span>
+                            <button class="copy-button" data-target="code-radio-send">COPY</button>
+                        </div>
+                        <pre id="code-radio-send"><code>from microbit import *
+import radio
+
+# 無線グループの設定（ロボット側と同じグループ番号にする）
+radio.config(group=23)
+radio.on()
+
+while True:
+    # Aボタン：左折指示
+    if button_a.was_pressed():
+        radio.send('L')
+        display.show('L')
+
+    # Bボタン：右折指示
+    if button_b.was_pressed():
+        radio.send('R')
+        display.show('R')
+
+    # A+B同時押し：前進指示
+    if button_a.is_pressed() and button_b.is_pressed():
+        radio.send('F')
+        display.show('F')
+
+    sleep(100)
+</code></pre>
+                        <div class="copy-hint">送信側に書き込んで、指示が届くか確認しよう！</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="code-block" id="radio-recv">
+                        <div class="code-header">
+                            <span class="code-title">RADIO | robot-receive.py</span>
+                            <button class="copy-button" data-target="code-radio-recv">COPY</button>
+                        </div>
+                        <pre id="code-radio-recv"><code>from microbit import *
+from haizen import *
+import radio
+
+motor = WheelMotor()
+
+# コントローラー側と同じグループ番号
+radio.config(group=23)
+radio.on()
+
+while True:
+    message = radio.receive()
+    if message:
+        if message == 'L':
+            # 左折：左モーターをゆっくり、右モーターを速くするなど
+            motor.set_speed(0, 50)
+            display.show('L')
+        elif message == 'R':
+            # 右折：右モーターをゆっくり、左モーターを速くするなど
+            motor.set_speed(50, 0)
+            display.show('R')
+        elif message == 'F':
+            # 前進
+            motor.set_speed(50, 50)
+            display.show('F')
+    sleep(100)
+</code></pre>
+                        <div class="copy-hint">受信側に書き込んで、動きが変わるか実験しよう！</div>
+                    </div>
+                </div>
+            </div>
+            <div class="question-box">
+                <h4>Q コントローラー側の操作で、どんな動きをさせる？</h4>
+                <ul>
+                    <li><span>Aボタン：</span>______________________________</li>
+                    <li><span>Bボタン：</span>______________________________</li>
+                    <li><span>A+B：</span>______________________________</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">08</div>
+            <h2>トラブルが起きたとき</h2>
+            <ul class="tips-grid">
+                <li><strong>まっすぐ進まない</strong> → モーターの左右スピード差を ±5 ずつ調整。タイヤがしっかりはまっているか確認。</li>
+                <li><strong>センサー値が安定しない</strong> → センサーを床に軽く押し当て、ケーブルの抜けがないかチェック。トリマーも 1/8 回転ずつ調整。</li>
+                <li><strong>黒線で止まらない</strong> → 閾値を 20 ずつ上げて再テスト。黒黒の判定後に 500ms ほど停止を入れてライン復帰を防ぐ。</li>
+                <li><strong>BGM が鳴り続ける</strong> → <code>music.play</code> の <code>wait</code> を <code>True</code> に変更して連続再生を防ぐ。</li>
+            </ul>
+        </section>
+
+        <section>
+            <div class="section-label">09</div>
+            <h2>最終確認 &amp; 次のチャレンジ</h2>
+            <p>ゴールラインを通過したら、走り方を振り返りましょう。どこでセンサーが迷ったか、どんな調整が効いたかを班で共有すると次のアイデアにつながります。</p>
+            <div class="cta-box">
+                <h3>micro:bit Python Editor ですぐ試そう</h3>
+                <p>ブラウザで開いてコードを貼り付け、<code>haizen.py</code> と一緒に保存します。</p>
+                <a class="cta-button" href="https://python.microbit.org/v/3" target="_blank" rel="noopener noreferrer">OPEN PYTHON EDITOR →</a>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        (function () {
+            var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby35cLu1BVvmk2GlgjLJ274d8nTCQU_TFKIMDjlLlqfTJvQF-3dYw4xVXxVqkGqPv26Hg/exec';
+
+            function copyCode(targetId) {
+                var codeBlock = document.getElementById(targetId);
+                if (!codeBlock) return;
+                var text = codeBlock.innerText;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).catch(function () {
+                        fallbackCopy(codeBlock, text);
+                    });
+                } else {
+                    fallbackCopy(codeBlock, text);
+                }
+            }
+
+            function fallbackCopy(codeBlock, text) {
+                var textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.setAttribute('readonly', '');
+                textarea.style.position = 'absolute';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.warn('コピーに失敗しました。手動で選択してください。');
+                }
+                document.body.removeChild(textarea);
+            }
+
+            function setMessage(message, isError) {
+                var messageBox = document.getElementById('submission-message');
+                if (!messageBox) return;
+                messageBox.textContent = message;
+                messageBox.style.color = isError ? '#c0392b' : '#0066CC';
+            }
+
+            function formatError(error) {
+                if (!error) {
+                    return '不明なエラー';
+                }
+                if (typeof error === 'string') {
+                    return error;
+                }
+                return error.message || String(error);
+            }
+
+            function toText(value) {
+                if (value === null || value === undefined) {
+                    return '';
+                }
+                return String(value);
+            }
+
+            function setReloadState(isLoading) {
+                var reloadButton = document.getElementById('reload-button');
+                if (!reloadButton) return;
+                if (isLoading) {
+                    if (!reloadButton.dataset.originalText) {
+                        reloadButton.dataset.originalText = reloadButton.textContent;
+                    }
+                    reloadButton.textContent = '読み込み中...';
+                    reloadButton.disabled = true;
+                } else {
+                    reloadButton.disabled = false;
+                    if (reloadButton.dataset.originalText) {
+                        reloadButton.textContent = reloadButton.dataset.originalText;
+                    }
+                }
+            }
+
+            function getLevelInfo(highestCourse) {
+                if (highestCourse >= 5) {
+                    return { level: 'advanced', icon: '🚀', label: 'チャレンジモード' };
+                }
+                if (highestCourse >= 3) {
+                    return { level: 'intermediate', icon: '⚙️', label: 'テクニカル調整' };
+                }
+                if (highestCourse >= 1) {
+                    return { level: 'basic', icon: '🔧', label: 'ウォームアップ' };
+                }
+                return { level: 'basic', icon: '🏁', label: 'スタート待機' };
+            }
+
+            function buildLeaderboard(entries) {
+                var board = document.getElementById('leaderboard');
+                if (!board) return;
+                if (!entries || !entries.length) {
+                    board.innerHTML = '<p class="leaderboard-empty">まだクリア報告がありません。</p>';
+                    return;
+                }
+
+                var grouped = {};
+                entries.forEach(function (entry) {
+                    var groupName = toText(entry.group).trim();
+                    if (!groupName) {
+                        return;
+                    }
+                    if (!grouped[groupName]) {
+                        grouped[groupName] = {
+                            group: groupName,
+                            courses: new Set(),
+                            highest: 0,
+                            latest: toText(entry.timestamp)
+                        };
+                    }
+                    var courseNum = parseInt(entry.course, 10);
+                    var isCleared = entry.cleared === true || entry.cleared === 'true' || entry.cleared === '1' || entry.cleared === 1;
+                    if (!isNaN(courseNum) && isCleared) {
+                        grouped[groupName].courses.add(courseNum);
+                        if (courseNum > grouped[groupName].highest) {
+                            grouped[groupName].highest = courseNum;
+                        }
+                    }
+                    if (entry.timestamp) {
+                        grouped[groupName].latest = toText(entry.timestamp);
+                    }
+                });
+
+                var rows = Object.values(grouped).map(function (item) {
+                    var courseList = Array.from(item.courses).sort(function (a, b) { return a - b; });
+                    return {
+                        group: item.group,
+                        highest: item.highest,
+                        clears: courseList.length,
+                        courses: courseList,
+                        latest: item.latest
+                    };
+                }).filter(function (item) { return item.clears > 0; });
+
+                if (!rows.length) {
+                    board.innerHTML = '<p class="leaderboard-empty">まだクリア報告がありません。</p>';
+                    return;
+                }
+
+                rows.sort(function (a, b) {
+                    if (b.clears !== a.clears) return b.clears - a.clears;
+                    if (b.highest !== a.highest) return b.highest - a.highest;
+                    var latestA = toText(a.latest);
+                    var latestB = toText(b.latest);
+                    if (latestA && latestB) return latestB.localeCompare(latestA);
+                    return toText(a.group).localeCompare(toText(b.group));
+                });
+
+                var html = rows.map(function (item, index) {
+                    var info = getLevelInfo(item.highest);
+                    var podium = ['🥇', '🥈', '🥉'];
+                    var icon = podium[index] || info.icon;
+                    var courseSummary = item.courses.length ? 'コース' + item.courses.join('・コース') : '記録なし';
+                    return '<div class="leaderboard-card" data-level="' + info.level + '">' +
+                        '<div class="rank-icon">' + icon + '</div>' +
+                        '<div class="rank-body">' +
+                        '<strong>' + item.group + '</strong>' +
+                        '<div class="rank-meta">最高コース: ' + (item.highest || '-') + ' / クリア数: ' + item.clears + '</div>' +
+                        '<div class="rank-meta">' + info.label + '｜' + courseSummary + '</div>' +
+                        '</div>' +
+                        '</div>';
+                }).join('');
+
+                board.innerHTML = html;
+            }
+
+            function renderScores(entries) {
+                buildLeaderboard(entries);
+                var list = document.getElementById('score-list');
+                if (!list) return;
+                list.innerHTML = '';
+                if (!entries || !entries.length) {
+                    list.innerHTML = '<li>まだ記録はありません。</li>';
+                    return;
+                }
+                entries.slice(0, 12).forEach(function (entry) {
+                    var li = document.createElement('li');
+                    var courseSpan = document.createElement('span');
+                    var courseText = toText(entry.course);
+                    courseSpan.textContent = courseText && courseText !== '-' ? 'コース' + courseText : '未設定';
+                    var groupSpan = document.createElement('span');
+                    var groupText = toText(entry.group);
+                    groupSpan.textContent = groupText || '-';
+                    var timeSpan = document.createElement('span');
+                    timeSpan.style.fontSize = '12px';
+                    timeSpan.style.color = '#555';
+                    timeSpan.textContent = toText(entry.timestamp);
+                    li.appendChild(courseSpan);
+                    li.appendChild(groupSpan);
+                    li.appendChild(timeSpan);
+                    list.appendChild(li);
+                });
+            }
+
+            function loadScores(showStatusMessage) {
+                if (!SCRIPT_URL || SCRIPT_URL.indexOf('DEPLOYMENT_ID') !== -1) {
+                    renderScores([{ course: '-', group: 'Apps Script を設定してください', timestamp: '' }]);
+                    if (showStatusMessage) {
+                        setMessage('Apps Script の Web アプリURLを設定してください。', true);
+                        setReloadState(false);
+                    }
+                    return;
+                }
+                if (showStatusMessage) {
+                    setMessage('ログを読み込み中...', false);
+                    setReloadState(true);
+                }
+                fetch(SCRIPT_URL + '?action=read')
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        renderScores(data.records || []);
+                        if (showStatusMessage) {
+                            setMessage('ログを更新しました。', false);
+                            setReloadState(false);
+                        }
+                    })
+                    .catch(function (error) {
+                        var message = 'スプレッドシートから取得できませんでした (' + formatError(error) + ')';
+                        renderScores([{ course: '-', group: message, timestamp: '' }]);
+                        if (showStatusMessage) {
+                            setMessage('ログの取得に失敗しました。Apps Script の公開設定を確認してください。\n' + message, true);
+                            setReloadState(false);
+                        }
+                    });
+            }
+
+            function submitClear(event) {
+                event.preventDefault();
+                if (!SCRIPT_URL || SCRIPT_URL.indexOf('DEPLOYMENT_ID') !== -1) {
+                    setMessage('Apps Script の Web アプリURLを設定してください。', true);
+                    return;
+                }
+                var form = event.target;
+                var course = form.course.value;
+                var group = form.group.value.trim();
+                if (!course || !group) {
+                    setMessage('コース番号とグループ名を入力してください。', true);
+                    return;
+                }
+                var payload = new URLSearchParams();
+                payload.append('course', course);
+                payload.append('group', group);
+                payload.append('cleared', '1');
+                setMessage('送信中...', false);
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: payload
+                })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(function (result) {
+                        if (result && result.status === 'success') {
+                            setMessage('記録しました！', false);
+                            form.reset();
+                            loadScores();
+                        } else {
+                            setMessage('記録に失敗しました。設定を確認してください。', true);
+                        }
+                    })
+                    .catch(function (error) {
+                        setMessage('送信エラーが発生しました。ネットワークまたは Apps Script を確認してください。 (' + formatError(error) + ')', true);
+                    });
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var buttons = document.querySelectorAll('.copy-button');
+                Array.prototype.forEach.call(buttons, function (button) {
+                    button.addEventListener('click', function () {
+                        var target = button.getAttribute('data-target');
+                        copyCode(target);
+                        button.textContent = 'COPIED!';
+                        setTimeout(function () {
+                            button.textContent = 'COPY';
+                        }, 1600);
+                    });
+                });
+
+                var form = document.getElementById('clear-form');
+                if (form) {
+                    form.addEventListener('submit', submitClear);
+                }
+                var reloadButton = document.getElementById('reload-button');
+                if (reloadButton) {
+                    reloadButton.addEventListener('click', function () {
+                        loadScores(true);
+                    });
+                }
+                loadScores();
+            });
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 基礎ガイド｜micro:bit と Python で学ぼう</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700;900&family=Bebas+Neue&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --tech-blue: #0066CC;
+            --tech-cyan: #00A8CC;
+            --tech-dark: #001F3F;
+            --tech-gray: #2C3E50;
+            --tech-light: #ECF0F1;
+            --tech-accent: #FF6B35;
+            --paper-white: #F8F9FA;
+        }
+
+        body {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            background: var(--paper-white);
+            color: var(--tech-dark);
+            line-height: 1.8;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 102, 204, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 102, 204, 0.05) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 0 24px 120px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            padding: 56px 0 72px;
+            border-bottom: 3px solid var(--tech-blue);
+            margin-bottom: 72px;
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, transparent 100%);
+        }
+
+        .header-tag {
+            display: inline-block;
+            background: var(--tech-blue);
+            color: #fff;
+            padding: 6px 18px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 28px;
+            clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 100%, 12px 100%);
+        }
+
+        h1 {
+            font-size: clamp(48px, 8vw, 96px);
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 2px;
+            line-height: 0.92;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--tech-blue) 0%, var(--tech-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-subtitle {
+            font-size: 20px;
+            font-weight: 400;
+            color: var(--tech-gray);
+            letter-spacing: 4px;
+            margin-bottom: 32px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .header-description {
+            font-size: 16px;
+            color: var(--tech-gray);
+            max-width: 780px;
+        }
+
+        section {
+            margin-bottom: 80px;
+            position: relative;
+        }
+
+        .section-label {
+            position: absolute;
+            top: -36px;
+            left: -48px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 72px;
+            font-weight: 900;
+            color: rgba(0, 102, 204, 0.12);
+            pointer-events: none;
+        }
+
+        h2 {
+            font-size: 32px;
+            margin-bottom: 16px;
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        h3 {
+            font-size: 22px;
+            margin-bottom: 12px;
+            color: var(--tech-blue);
+        }
+
+        p {
+            margin-bottom: 16px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .info-card {
+            background: #fff;
+            border: 1px solid rgba(0, 102, 204, 0.12);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--tech-blue), var(--tech-cyan));
+            animation: gradientSlide 4s linear infinite;
+            background-size: 200% 100%;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--tech-dark);
+            color: #fff;
+            padding: 4px 10px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            font-weight: 700;
+            clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%);
+            margin-bottom: 12px;
+        }
+
+        .concept-card {
+            background: rgba(0, 102, 204, 0.08);
+            border: 1px solid rgba(0, 102, 204, 0.2);
+            padding: 20px;
+            margin-top: 18px;
+        }
+
+        .practice-card {
+            border: 1px solid rgba(255, 107, 53, 0.35);
+            background: rgba(255, 107, 53, 0.08);
+            padding: 18px 22px;
+            margin-top: 18px;
+        }
+
+        .practice-card strong {
+            color: var(--tech-accent);
+        }
+
+        .concept-figure {
+            margin: 20px 0;
+            text-align: center;
+            background: #fff;
+            border: 1px solid rgba(0, 102, 204, 0.12);
+            padding: 16px;
+        }
+
+        .concept-figure img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .concept-figure figcaption {
+            font-size: 13px;
+            color: var(--tech-gray);
+            margin-top: 10px;
+        }
+
+        .script-snippet {
+            background: #0C1220;
+            color: #ECF0F1;
+            border-radius: 6px;
+            margin-top: 12px;
+            overflow-x: auto;
+        }
+
+        .script-snippet pre {
+            margin: 0;
+            padding: 16px 20px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre;
+        }
+
+        .code-block {
+            position: relative;
+            background: #0C1220;
+            color: #ECF0F1;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            background: rgba(0, 168, 204, 0.18);
+            border-bottom: 1px solid rgba(236, 240, 241, 0.1);
+        }
+
+        .code-title {
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+
+        pre {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            padding: 20px;
+            white-space: pre;
+        }
+
+        .copy-hint {
+            font-size: 13px;
+            color: rgba(236, 240, 241, 0.8);
+            margin-top: 10px;
+            padding: 0 16px 16px;
+        }
+
+        .copy-button {
+            background: transparent;
+            border: 1px solid rgba(236, 240, 241, 0.4);
+            color: #ECF0F1;
+            padding: 6px 12px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .copy-button:hover {
+            background: rgba(236, 240, 241, 0.08);
+        }
+
+        .hint-card {
+            border: 1px solid rgba(0, 102, 204, 0.25);
+            background: rgba(0, 102, 204, 0.12);
+            padding: 14px 18px;
+            margin-top: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .hint-card strong {
+            color: var(--tech-dark);
+            letter-spacing: 1px;
+        }
+
+        details.advanced-snippet {
+            margin-top: 12px;
+        }
+
+        details.advanced-snippet summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--tech-blue);
+        }
+
+        details.advanced-snippet .code-block {
+            margin-top: 12px;
+        }
+
+        .resource-card {
+            border: 1px solid rgba(0, 102, 204, 0.15);
+            background: #fff;
+            padding: 20px 22px;
+        }
+
+        .resource-card ul {
+            margin-top: 10px;
+            padding-left: 18px;
+        }
+
+        @keyframes gradientSlide {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+
+        @media (max-width: 720px) {
+            .section-label {
+                left: -20px;
+                font-size: 56px;
+            }
+
+            header {
+                padding: 40px 0 56px;
+                margin-bottom: 56px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-tag">PYTHON STUDY NOTE</div>
+            <h1>Python 基礎をおさえよう</h1>
+            <div class="header-subtitle">From micro:bit Projects to Everyday Coding</div>
+            <p class="header-description">
+                ライントレース講座で登場した Python のコードを、基礎から振り返るためのガイドです。<br>
+                変数 / if / elif / else / while True / def / sleep など、作品づくりに欠かせない構文を、micro:bit の例とふだんの Python の使い方の両方で学びます。
+            </p>
+        </header>
+
+        <section>
+            <div class="section-label">01</div>
+            <h2>このページの使い方</h2>
+            <div class="grid grid-2">
+                <div class="info-card">
+                    <span class="badge">FOR STUDENTS</span>
+                    <h3>知りたいときに読み返そう</h3>
+                    <p>授業で出てきたコードを「なぜ？」と思ったら、このページで復習してみましょう。短いサンプルと図解で確認し、そのまま micro:bit Python Editor や Google Colab で試せるようにしてあります。</p>
+                </div>
+                <div class="info-card">
+                    <span class="badge">TOOLS</span>
+                    <h3>2つのテスト環境</h3>
+                    <ul>
+                        <li><strong>micro:bit Python Editor</strong>（<a href="https://python.microbit.org/v/3" target="_blank" rel="noopener noreferrer">ブラウザで開く</a>）… micro:bit 本体を使うときに便利。</li>
+                        <li><strong>Google Colab</strong>（<a href="https://colab.research.google.com" target="_blank" rel="noopener noreferrer">アカウントがあれば無料</a>）… パソコン上だけで Python を試したいときに使おう。</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="hint-card">
+                <strong>どこから読めばいい？</strong><br>
+                気になる章だけ読んでも OK。時間があるときは上から順番に読み進めると、Python の基本構文を一通り体験できます。
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">02</div>
+            <h2>はじめの一歩：Python の書き方</h2>
+            <p>まずは画面に文字を出したり、メモを残したりする基本から始めましょう。AtCoder の APG4b (Python) や Progate の入門編でも、同じ順番で学びます。</p>
+            <div class="grid grid-2">
+                <div class="info-card">
+                    <span class="badge">STEP 0</span>
+                    <h3>文字や数字を表示してみる</h3>
+                    <p><code>print()</code> は Python の最初の一歩。micro:bit でも Colab でも同じように使えます。</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-title">hello.py</span>
+                            <button class="copy-button" data-target="code-hello">COPY</button>
+                        </div>
+                        <pre id="code-hello"><code>print("Hello, Python!")
+print(2025)
+</code></pre>
+                        <div class="copy-hint">"（ダブルクォーテーション）で囲むと文字列、数字だけならそのままで OK。</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <span class="badge">STEP 0.5</span>
+                    <h3>コメントでメモを書こう</h3>
+                    <p>コメントを活用すると、自分だけの学習ノートができます。APG4b でも「# で始まる行はコメント」というルールが紹介されています。</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-title">comment.py</span>
+                            <button class="copy-button" data-target="code-comment">COPY</button>
+                        </div>
+                        <pre id="code-comment"><code># これはコメント。実行されません。
+# 今日やること：Hello を表示する
+print("こんにちは！")
+</code></pre>
+                        <div class="copy-hint">行の先頭に <code>#</code> を付けるだけでコメントになります。</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h3>日常のループ（カウントダウン）</h3>
+                    <p>カウントダウンや反復練習の記録もループなら簡単に作れます。</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-title">countdown_timer.py</span>
+                            <button class="copy-button" data-target="code-loop-daily">COPY</button>
+                        </div>
+                        <pre id="code-loop-daily"><code>from time import sleep
+
+seconds = 3
+
+while seconds > 0:
+    print(f"発射まで {seconds}...")
+    sleep(1)
+    seconds -= 1
+
+print("スタート！")
+</code></pre>
+                        <div class="copy-hint">micro:bit がなくても、タイマーやストレッチの声かけなどに応用できます。</div>
+                    </div>
+                </div>
+            </div>
+            <div class="practice-card">
+                <strong>チャレンジ：</strong>好きな食べ物と好きな色を <code>print()</code> で表示し、コメントで「なぜ好きか」を書いてみよう。
+                <details class="advanced-snippet">
+                    <summary>解答例をみる</summary>
+                    <div class="script-snippet"><pre><code># 理由：甘くておいしい
+print("好きな食べ物: シュークリーム")
+# 理由：見ていると落ち着く
+print("好きな色: 青")
+</code></pre></div>
+                </details>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">03</div>
+            <h2>変数（variable）を使いこなそう</h2>
+            <p>変数は「名前をつけて値をしまっておく箱」。数字でも文字でもしまっておけます。micro:bit では速度や閾値を覚えておくのに大活躍です。AtCoder APG4b の最初のレッスンでも、まずはこの「箱に入れる」イメージを身につけます。</p>
+            <figure class="concept-figure">
+                <img src="https://dummyimage.com/680x280/edf3ff/0066cc&text=%E5%A4%89%E6%95%B0%E3%81%AF%E7%AE%B1%E3%81%AB%E5%80%A4%E3%82%92%E5%85%A5%E3%82%8C%E3%82%8B" alt="箱に値を入れて取り出すイメージ">
+                <figcaption>たとえば <code>speed</code> という箱に 50 を入れておけば、必要なときに <code>speed</code> から 50 を取り出せます。</figcaption>
+            </figure>
+            <div class="grid grid-2">
+                <div class="info-card">
+                    <h3>micro:bit の例</h3>
+                    <p>左右のモーター速度を変数にすると、あとから調整しやすくなります。</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-title">motor_speed.py</span>
+                            <button class="copy-button" data-target="code-var-microbit">COPY</button>
+                        </div>
+                        <pre id="code-var-microbit"><code>from microbit import *
+from haizen import *
+
+LEFT_SPEED = 45
+RIGHT_SPEED = 48
+
+motor = WheelMotor()
+
+while True:
+    motor.set_speed(LEFT_SPEED, RIGHT_SPEED)
+    sleep(100)
+</code></pre>
+                        <div class="copy-hint">スピードを左右で分けて保存すると、直進が安定しやすくなります。</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h3>ふだんの Python 例</h3>
+                    <p>Google Colab などでは、こんなふうに計算結果を保存できます。</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-title">using_variable.ipynb</span>
+                            <button class="copy-button" data-target="code-var-colab">COPY</button>
+                        </div>
+                        <pre id="code-var-colab"><code># 点数の平均を計算する例
+math_score = 82
+science_score = 76
+english_score = 90
+
+total = math_score + science_score + english_score
+average = total / 3
+
+print("合計点:", total)
+print("平均点:", average)
+</code></pre>
+                        <div class="copy-hint">変数名は意味がわかるように書けば OK。英語でも日本語ローマ字でも大丈夫。</div>
+                    </div>
+                </div>
+            </div>
+            <div class="practice-card">
+                <strong>チャレンジ：</strong>micro:bit で <code>LEFT_SPEED</code> を 5 ずつ変えて、何回でちょうどまっすぐ進めるか試してみよう。記録表を作ってみるのもおすすめ。Python の練習サイト APG4b なら、<a href="https://atcoder.jp/contests/APG4bPython/tasks/APG4b_ex1" target="_blank" rel="noopener noreferrer">EX1</a> や <a href="https://atcoder.jp/contests/APG4bPython/tasks/APG4b_ex2" target="_blank" rel="noopener noreferrer">EX2</a> で変数の入力 / 出力を確かめられます。
+                <details class="advanced-snippet">
+                    <summary>解答例をみる（APG4b EX2 風）</summary>
+                    <div class="script-snippet"><pre><code># 入力された3科目の合計と平均を求める
+a = int(input())
+b = int(input())
+c = int(input())
+
+total = a + b + c
+average = total // 3
+
+print("合計", total)
+print("平均", average)
+</code></pre></div>
+                </details>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">04</div>
+            <h2>入力を受け取って計算しよう</h2>
+            <p>キーボードやセンサーから値を受け取れると、プログラムはぐっと便利になります。AtCoder APG4b の <a href="https://atcoder.jp/contests/APG4bPython/tasks/APG4b_ex5" target="_blank" rel="noopener noreferrer">EX5</a> では、入力された数値を二倍にして出力する課題が登場します。</p>
+            <div class="grid grid-2">
+                <div class="info-card">
+                    <h3>Python（Colab）での例</h3>
+                    <p><code>input()</code> で文字列を受け取り、<code>int()</code> で整数に変換して使います。繰り返しと組み合わせれば、好きな回数だけ計算できます。</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-title">input_average.py</span>
+                            <button class="copy-button" data-target="code-input-colab">COPY</button>
+                        </div>
+                        <pre id="code-input-colab"><code>n = int(input("人数を入力: "))
+
+total = 0
+for i in range(n):
+    score = int(input(f"{i+1}人目の点数: "))
+    total += score
+
+average = total / n
+print("平均点は", average)
+</code></pre>
+                        <div class="copy-hint">文字列から数値に変換する <code>int()</code>、繰り返し回数を決める <code>range()</code> にも注目。</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h3>micro:bit での例（ボタン入力）</h3>
+                    <p>micro:bit にはキーボードがないので、ボタンや加速度センサーを「入力」として使います。A ボタンが押された回数を表示するだけでも、立派な入力処理です。</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-title">button_counter.py</span>
+                            <button class="copy-button" data-target="code-input-microbit">COPY</button>
+                        </div>
+                        <pre id="code-input-microbit"><code>from microbit import *
+
+count = 0
+
+while True:
+    if button_a.was_pressed():
+        count += 1
+        display.scroll(str(count))
+    sleep(50)
+</code></pre>
+                        <div class="copy-hint">ボタンを押した回数を変数に保存 → 表示。この流れを発展させれば、しきい値の調整メニューなども作れます。</div>
+                    </div>
+                </div>
+            </div>
+            <div class="practice-card">
+                <strong>チャレンジ：</strong>AtCoder APG4b の <a href="https://atcoder.jp/contests/APG4bPython/tasks/APG4b_ex6" target="_blank" rel="noopener noreferrer">EX6</a> を参考に、入力された数列の合計と最大値を表示するプログラムを書いてみよう。
+                <details class="advanced-snippet">
+                    <summary>解答例をみる</summary>
+                    <div class="script-snippet"><pre><code>n = int(input())
+numbers = list(map(int, input().split()))
+
+total = sum(numbers)
+maximum = max(numbers)
+
+print("合計:", total)
+print("最大値:", maximum)
+</code></pre></div>
+                </details>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">05</div>
+            <h2>条件分岐 if / elif / else</h2>
+            <p>条件分岐は「もし〜なら」の命令。ラインセンサーの閾値判定でも、メニュー選択でも活躍します。下の図のように、条件を順番にたどっていくイメージをつかみましょう。</p>
+            <figure class="concept-figure">
+                <img src="https://dummyimage.com/660x260/f0f8ff/0066cc&text=if+%E2%86%92+elif+%E2%86%92+else" alt="if から elif, else へ進む判断のイメージ">
+                <figcaption>上から条件をチェックし、当てはまったらそこで処理を実行して終了します。</figcaption>
+            </figure>
+            <div class="grid grid-2">
+                <div class="info-card">
+                    <h3>ラインセンサーでの条件分岐</h3>
+                    <p>センサーの値が閾値より大きいか小さいかで動かし方を変えます。</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-title">if_line_sensor.py</span>
+                            <button class="copy-button" data-target="code-if-microbit">COPY</button>
+                        </div>
+                        <pre id="code-if-microbit"><code>from microbit import *
+
+THRESHOLD = 320
+
+while True:
+    sensor_value = pin1.read_analog()
+
+    if sensor_value >= THRESHOLD:
+        display.show("■")  # 黒いラインを見つけたら■
+    else:
+        display.show("□")  # 白い床なら□
+
+    sleep(100)
+</code></pre>
+                        <div class="copy-hint">条件の順番は上からチェックされます。「>=」や「<」などの演算子の意味も覚えよう。</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h3>elif を使ったメニュー分岐</h3>
+                    <p>複数の条件があるときは <code>elif</code> を使って順番に判定します。</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-title">elif_menu.py</span>
+                            <button class="copy-button" data-target="code-if-colab">COPY</button>
+                        </div>
+                        <pre id="code-if-colab"><code>mode = input("モードを選んでください (easy / normal / hard): ")
+
+if mode == "easy":
+    print("スピード: 30、落ち着いて！")
+elif mode == "normal":
+    print("スピード: 50、ちょうどいい！")
+elif mode == "hard":
+    print("スピード: 70、上級者向け！")
+else:
+    print("そのモードはまだ未対応です。")
+</code></pre>
+                        <div class="copy-hint">条件が当てはまった時点で下の条件には進みません。最後に <code>else</code> を入れておくと安心。</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h3>日常の条件分岐</h3>
+                    <p>「天気によって荷物を変える」など日常の判断も if 文で再現できます。</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-title">weather_helper.py</span>
+                            <button class="copy-button" data-target="code-if-daily">COPY</button>
+                        </div>
+                        <pre id="code-if-daily"><code>weather = input("今日の天気は？ (sunny / rainy / cloudy): ")
+
+if weather == "sunny":
+    print("水筒にスポーツドリンクを入れて出発！")
+elif weather == "rainy":
+    print("レインコートと長靴を忘れずに。")
+else:
+    print("羽織れるパーカーを持っていこう。")
+</code></pre>
+                        <div class="copy-hint">場面を置き換えるだけで、自分の日常にぴったりな if 文がどんどん作れます。</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hint-card">
+                <strong>ワンポイント</strong><br>
+                条件は「一番厳しいもの」から書くとミスが減ります。閾値のように境目がはっきりしている場合は、>= と < でカバーできます。
+            </div>
+            <div class="practice-card">
+                <strong>チャレンジ：</strong>クラスで開く「スピードレース大会」の司会者になったつもりで、入力された点数に応じてメッセージ（例: 「ゴールドメダル！」/「ピットイン」/「チームで作戦会議」）を表示するプログラムを書いてみよう。AtCoder APG4b の <a href="https://atcoder.jp/contests/APG4bPython/tasks/APG4b_ex13" target="_blank" rel="noopener noreferrer">EX13</a> で条件分岐の腕をさらに磨いてみよう。
+                <details class="advanced-snippet">
+                    <summary>解答例をみる</summary>
+                    <div class="script-snippet"><pre><code>score = int(input())
+
+if score >= 80:
+    print("ゴールドメダル！")
+elif score >= 50:
+    print("ピットインして調整しよう")
+else:
+    print("チームで作戦会議だ！")
+</code></pre></div>
+                </details>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">06</div>
+            <h2>繰り返し処理 while True と sleep</h2>
+            <p><code>while True:</code> は「ずっと繰り返す」という意味。micro:bit のループや、Colab のシミュレーションでもよく使います。「同じ処理をくり返すライン」をくるくる回るイメージをつかんでおくと理解しやすいです。</p>
+            <figure class="concept-figure">
+                <img src="https://dummyimage.com/660x260/edf9ff/0066cc&text=Start+%E2%86%92+Condition+Check+%E2%86%92+Process+%E2%86%92+Loop" alt="条件を確認しながら繰り返すループのイメージ">
+                <figcaption>条件が True の間はぐるぐる回り続ける。False（または <code>break</code>）でループから抜けます。</figcaption>
+            </figure>
+            <div class="grid grid-2">
+                <div class="info-card">
+                    <h3>micro:bit でのループ</h3>
+                    <p>ラインセンサーを常に読み続ける処理は <code>while True</code> で書きます。<code>sleep</code> で少し休ませると安定します。</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-title">loop_sleep.py</span>
+                            <button class="copy-button" data-target="code-loop-microbit">COPY</button>
+                        </div>
+                        <pre id="code-loop-microbit"><code>from microbit import *
+
+while True:
+    display.show(Image.HEART)
+    sleep(200)
+    display.clear()
+    sleep(200)
+</code></pre>
+                        <div class="copy-hint">sleep の数字はミリ秒。200 なら 0.2 秒ごとにハートが点滅します。</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h3>条件付きで抜けるループ</h3>
+                    <p>無限ループに見えても、条件が整ったら <code>break</code> で抜けることができます。</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-title">loop_break.py</span>
+                            <button class="copy-button" data-target="code-loop-colab">COPY</button>
+                        </div>
+                        <pre id="code-loop-colab"><code>from time import sleep
+
+count = 0
+
+while True:
+    count += 1
+    print(count, "回ジャンプ！")
+    sleep(0.5)
+
+    if count >= 5:
+        print("おつかれさま！")
+        break
+</code></pre>
+                        <div class="copy-hint">Google Colab で <code>sleep</code> を使うときは <code>from time import sleep</code> を忘れずに！</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h3>日常のループ（カウントダウン）</h3>
+                    <p>カウントダウンや反復練習の記録もループなら簡単に作れます。</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-title">countdown_timer.py</span>
+                            <button class="copy-button" data-target="code-loop-daily">COPY</button>
+                        </div>
+                        <pre id="code-loop-daily"><code>from time import sleep
+
+seconds = 3
+
+while seconds > 0:
+    print(f"発射まで {seconds}...")
+    sleep(1)
+    seconds -= 1
+
+print("スタート！")
+</code></pre>
+                        <div class="copy-hint">micro:bit がなくても、タイマーやストレッチの声かけなどに応用できます。</div>
+                    </div>
+                </div>
+            </div>
+            <div class="practice-card">
+                <strong>チャレンジ：</strong>micro:bit で「エナジーダンス」タイマーを作って、A ボタンを押したらループを抜けて「FINISH!」と表示しよう。ダンスの回数をスクロール表示するなど、自分たちなりの演出も追加してみて。さらに、APG4b の <a href="https://atcoder.jp/contests/APG4bPython/tasks/APG4b_ex7" target="_blank" rel="noopener noreferrer">EX7</a> に挑戦すると、ループでの合計計算のコツがつかめます。
+                <details class="advanced-snippet">
+                    <summary>解答例をみる（ループ脱出）</summary>
+                    <div class="script-snippet"><pre><code>from microbit import *
+
+count = 0
+
+while True:
+    if button_a.was_pressed():
+        display.scroll(str(count))
+        display.scroll("FINISH!")
+        break
+
+    display.show(str(count % 10))
+    sleep(200)
+    count += 1
+</code></pre></div>
+                </details>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">07</div>
+            <h2>関数 def でまとまりを作る</h2>
+            <p>関数は「よく使う処理」をまとめて名前をつけたもの。ライン追従の <code>trace_line()</code> も関数です。自分で作ると読みやすくなります。</p>
+            <div class="grid grid-2">
+                <div class="info-card">
+                    <h3>ライン追従の関数</h3>
+                    <p>Step 4 のコードでは、センサーの判定を <code>trace_line()</code> にまとめていました。</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-title">trace_line_function.py</span>
+                            <button class="copy-button" data-target="code-def-microbit">COPY</button>
+                        </div>
+                        <pre id="code-def-microbit"><code>def trace_line(left_sensor, right_sensor, threshold):
+    if left_sensor < threshold and right_sensor < threshold:
+        motor.set_speed(STRAIGHT_LEFT_SPEED, STRAIGHT_RIGHT_SPEED)
+    elif left_sensor >= threshold and right_sensor < threshold:
+        motor.set_speed(TURN_LEFT_INNER_SPEED, TURN_LEFT_OUTER_SPEED)
+    elif left_sensor < threshold and right_sensor >= threshold:
+        motor.set_speed(TURN_RIGHT_OUTER_SPEED, TURN_RIGHT_INNER_SPEED)
+    else:
+        motor.stop()
+
+while True:
+    trace_line(pin1.read_analog(), pin2.read_analog(), THRESHOLD)
+</code></pre>
+                        <div class="copy-hint">一度書けば、呼び出すときは <code>trace_line(...)</code> と書くだけ。読みやすさがアップします。</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h3>引数と戻り値</h3>
+                    <p>関数は値を受け取り、計算して結果を返すこともできます。</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-title">function_return.py</span>
+                            <button class="copy-button" data-target="code-def-colab">COPY</button>
+                        </div>
+                        <pre id="code-def-colab"><code>def to_microbit_speed(percent):
+    """0〜100% の値を micro:bit の速度（-100〜100）に変換"""
+    return int(percent * 100 / 100)
+
+speed_percent = 65
+microbit_speed = to_microbit_speed(speed_percent)
+
+print("micro:bit に渡す値:", microbit_speed)
+</code></pre>
+                        <div class="copy-hint">docstring（"""..."""）に説明を書くと、チームメンバーにも親切。</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hint-card">
+                <strong>ワンポイント</strong><br>
+                関数名や引数名は、何をするのかをそのまま表すとよいです。例: <code>read_sensor()</code>, <code>set_speed(left, right)</code> など。
+            </div>
+            <div class="practice-card">
+                <strong>チャレンジ：</strong>APG4b の <a href="https://atcoder.jp/contests/APG4bPython/tasks/APG4b_ex14" target="_blank" rel="noopener noreferrer">EX14</a> を参考に、2つの数を受け取って最大公約数を返す関数を作ってみよう。
+                <details class="advanced-snippet">
+                    <summary>解答例をみる</summary>
+                    <div class="script-snippet"><pre><code>def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
+
+x = int(input())
+y = int(input())
+print(gcd(x, y))
+</code></pre></div>
+                </details>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">08</div>
+            <h2>総合例：小さなライントレースを組み立てる</h2>
+            <p>ここまで学んだ要素をまとめたサンプルです。数値の初期値は仮のものなので、実際のロボットに合わせて調整してください。</p>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-title">mini-line-trace.py</span>
+                    <button class="copy-button" data-target="code-mini-trace">COPY</button>
+                </div>
+                <pre id="code-mini-trace"><code>from microbit import *
+from haizen import *
+
+motor = WheelMotor()
+
+STRAIGHT_LEFT_SPEED = 48
+STRAIGHT_RIGHT_SPEED = 50
+TURN_LEFT_INNER_SPEED = 30
+TURN_LEFT_OUTER_SPEED = 60
+TURN_RIGHT_INNER_SPEED = 32
+TURN_RIGHT_OUTER_SPEED = 58
+THRESHOLD = 320
+
+def trace_line(left_sensor, right_sensor):
+    if left_sensor < THRESHOLD and right_sensor < THRESHOLD:
+        motor.set_speed(STRAIGHT_LEFT_SPEED, STRAIGHT_RIGHT_SPEED)
+    elif left_sensor >= THRESHOLD and right_sensor < THRESHOLD:
+        motor.set_speed(TURN_LEFT_INNER_SPEED, TURN_LEFT_OUTER_SPEED)
+    elif left_sensor < THRESHOLD and right_sensor >= THRESHOLD:
+        motor.set_speed(TURN_RIGHT_OUTER_SPEED, TURN_RIGHT_INNER_SPEED)
+    else:
+        motor.stop()
+
+while True:
+    left = pin1.read_analog()
+    right = pin2.read_analog()
+    trace_line(left, right)
+    sleep(20)
+</code></pre>
+                <div class="copy-hint">これをベースにして、自分たちの速度・閾値・カーブ処理を書き換えていこう。</div>
+            </div>
+            <div class="practice-card">
+                <strong>チャレンジ：</strong>スピードや閾値の定数を自分のロボット用に調整し、走行ログをメモしよう。AtCoder の課題で腕試しをしたい人は、<a href="https://atcoder.jp/contests/apg4bpython/tasks/APG4b_cc" target="_blank" rel="noopener noreferrer">APG4b 章末問題</a> に挑戦して、入力→処理→出力の流れを総復習してみてください。
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">09</div>
+            <h2>もっと学びたいときのヒント</h2>
+            <div class="grid grid-2">
+                <div class="resource-card">
+                    <h3>調べ方のコツ</h3>
+                    <ul>
+                        <li><strong>公式リファレンス</strong>… <a href="https://microbit-micropython.readthedocs.io/ja/latest/" target="_blank" rel="noopener noreferrer">micro:bit MicroPython ドキュメント</a>。</li>
+                        <li><strong>AtCoder APG4b</strong>… <a href="https://atcoder.jp/contests/APG4bPython" target="_blank" rel="noopener noreferrer">講座ページ</a> と <a href="https://atcoder.jp/contests/APG4bPython/tasks" target="_blank" rel="noopener noreferrer">課題一覧</a> で、今回出てきたテーマを段階的に復習できます。</li>
+                        <li><strong>Progate Python コース</strong>… <a href="https://prog-8.com/" target="_blank" rel="noopener noreferrer">Progate</a> のスライド教材で、アニメーション付きの解説を体験しよう。</li>
+                        <li><strong>Colab ノート</strong>… 調べたことや解いた問題をノートにまとめると、あとで見返せます。</li>
+                    </ul>
+                </div>
+                <div class="resource-card">
+                    <h3>おすすめ練習アイデア</h3>
+                    <ul>
+                        <li>micro:bit の LED 表示で「速度メーター」を作ってみる。</li>
+                        <li>Google Colab で if / elif / else を使った簡単なクイズゲームを作る。</li>
+                        <li>友だちと関数を交換して、どのように書いたか比べてみる。</li>
+                        <li><a href="https://atcoder.jp/contests/APG4bPython/tasks" target="_blank" rel="noopener noreferrer">APG4b の演習問題</a>を1日1問解いてみる。</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="hint-card">
+                <strong>自分専用のメモを作ろう</strong><br>
+                コードと一緒に「何のための変数？」「どの条件で使う？」などをメモしておくと、次の作品づくりがぐっと楽になります。
+            </div>
+        </section>
+    </div>
+
+    <script>
+        (function () {
+            function copyCode(targetId) {
+                var codeBlock = document.getElementById(targetId);
+                if (!codeBlock) return;
+                var text = codeBlock.innerText;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).catch(function () {
+                        fallbackCopy(codeBlock, text);
+                    });
+                } else {
+                    fallbackCopy(codeBlock, text);
+                }
+            }
+
+            function fallbackCopy(codeBlock, text) {
+                var textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.setAttribute('readonly', '');
+                textarea.style.position = 'absolute';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.warn('コピーに失敗しました。手動で選択してください。');
+                }
+                document.body.removeChild(textarea);
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var buttons = document.querySelectorAll('.copy-button');
+                Array.prototype.forEach.call(buttons, function (button) {
+                    button.addEventListener('click', function () {
+                        var target = button.getAttribute('data-target');
+                        copyCode(target);
+                        button.textContent = 'COPIED!';
+                        setTimeout(function () {
+                            button.textContent = 'COPY';
+                        }, 1600);
+                    });
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
