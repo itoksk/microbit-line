@@ -172,44 +172,62 @@ function respond(body, statusCode) {
 以下のコードを Google Apps Script に貼り付け、`matches` シート（ヘッダーは `timestamp|matchId|teamA|teamB|scoreA|scoreB|winner|loser|notes`）を自動生成できるようにします。リポジトリで使用している最新のデプロイ URL は `lesson-microbit-curling.html` の `MATCH_SCRIPT_URL` に記載されています。
 
 ```javascript
-const SHEET_NAME = 'matches';
-const SPREADSHEET_ID = '';      // 既存のスプレッドシートを使う場合はIDを指定
-const CACHE_DURATION = 60;      // ランキングキャッシュの秒数
+/* eslint-disable no-var */
+/**
+ * 試合結果API（Apps Script Webアプリ）
+ * シートは自動初期化。列は:
+ * timestamp | matchId | teamA | teamB | scoreA | scoreB | winner | loser | notes
+ */
+
+const SHEET_NAME = 'matches';                 // シート名（存在しなければ自動作成）
+const SPREADSHEET_ID = '';                    // 既存シートを使う場合はIDを指定。空なら「バインド先」を使用
+const CACHE_DURATION = 60;                    // ランキングキャッシュ秒
 const HEADERS = [
   'timestamp', 'matchId', 'teamA', 'teamB', 'scoreA', 'scoreB', 'winner', 'loser', 'notes',
 ];
 
+/**
+ * POST: 試合登録
+ * 受入: teamA, teamB, scoreA, scoreB, notes（x-www-form-urlencoded推奨）
+ */
 function doPost(e) {
   try {
-    const params = e && e.parameter ? e.parameter : {};
-    const teamA = (params.teamA || '').trim();
-    const teamB = (params.teamB || '').trim();
-    const scoreA = Number.parseInt(params.scoreA, 10);
-    const scoreB = Number.parseInt(params.scoreB, 10);
-    const notes  = (params.notes || '').trim();
+    /** 入力取り出し・整形 */
+    const P = e && e.parameter ? e.parameter : {};
+    const teamA = (P.teamA || '').trim();
+    const teamB = (P.teamB || '').trim();
+    const scoreA = Number.parseInt(P.scoreA, 10);
+    const scoreB = Number.parseInt(P.scoreB, 10);
+    const notes  = (P.notes || '').trim();
 
+    /** バリデーション */
     if (!teamA || !teamB || Number.isNaN(scoreA) || Number.isNaN(scoreB)) {
       return json({ status: 'error', message: 'teamA/teamB/scoreA/scoreB を確認してください。' });
     }
 
+    /** 勝敗判定 */
     const winner = scoreA === scoreB ? 'draw' : (scoreA > scoreB ? teamA : teamB);
     const loser  = scoreA === scoreB ? ''     : (scoreA > scoreB ? teamB : teamA);
 
+    /** 競合回避ロック */
     const lock = LockService.getScriptLock();
     lock.tryLock(5000);
 
-    const sheet = getSheet();
-    ensureHeader(sheet);
+    /** シート準備・ヘッダー整備 */
+    const sheet = getSheet();                 // A/B対策：安定取得＋自動作成
+    ensureHeader(sheet);                      // C対策：ヘッダー強制
 
+    /** 行追加 */
     const ts = new Date();
-    const matchId = makeMatchId(ts);
+    const matchId = makeMatchId(ts);          // 例: 20250924-071530-1a2b3c4d
     sheet.appendRow([
       ts, matchId, teamA, teamB, scoreA, scoreB, winner, loser, notes,
     ]);
 
     lock.releaseLock();
-    clearRankingCache();
 
+    /** 集計キャッシュ破棄→最新を返す */
+    clearRankingCache();
     return json({
       status: 'success',
       message: '記録しました！',
@@ -221,6 +239,9 @@ function doPost(e) {
   }
 }
 
+/**
+ * GET: `?action=ranking` でランキング＋直近取得
+ */
 function doGet(e) {
   try {
     const action = ((e && e.parameter && e.parameter.action) || '').toLowerCase();
@@ -237,16 +258,27 @@ function doGet(e) {
   }
 }
 
+/**
+ * OPTIONS: プリフライトには任意ヘッダー不可のため200を素直に返す
+ * （フロント側はプリフライト不要な“simple request”で送ること）
+ */
 function doOptions() {
-  return ContentService.createTextOutput('ok');
+  return ContentService.createTextOutput('ok');  // setHeaderは不可
 }
 
+/**
+ * JSONレスポンス（Apps Scriptは任意ステータスコード非対応）
+ */
 function json(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+/**
+ * ランキング生成（キャッシュ付き）
+ * 勝ち=3点, 引き分け=1点, 負け=0
+ */
 function buildRanking() {
   const cache = CacheService.getScriptCache();
   const hit = cache.get('ranking');
@@ -258,11 +290,12 @@ function buildRanking() {
   const header = values.shift();
   const idx = indexOf(header);
 
+  /** チーム別集計 */
   const stats = {};
-  values.forEach(row => {
+  for (const row of values) {
     const ta = String(row[idx.teamA] || '').trim();
     const tb = String(row[idx.teamB] || '').trim();
-    if (!ta || !tb) return;
+    if (!ta || !tb) continue;
 
     const sa = Number(row[idx.scoreA] || 0);
     const sb = Number(row[idx.scoreB] || 0);
@@ -283,9 +316,10 @@ function buildRanking() {
       stats[tb].wins++;  stats[ta].losses++;
     }
     stats[ta].matchCount++; stats[tb].matchCount++;
-  });
+  }
 
-  const ranking = Object.keys(stats).map(team => {
+  /** ソート */
+  const ranking = Object.keys(stats).map((team) => {
     const r = stats[team];
     const diff = r.pointsFor - r.pointsAgainst;
     const points = r.wins * 3 + r.draws;
@@ -311,6 +345,9 @@ function buildRanking() {
   return ranking;
 }
 
+/**
+ * 直近試合の取得
+ */
 function getRecentMatches(limit = 10) {
   const sheet = getSheet();
   ensureHeader(sheet);
@@ -319,7 +356,7 @@ function getRecentMatches(limit = 10) {
   const idx = indexOf(header);
 
   const rows = values.slice(-limit).reverse();
-  return rows.map(r => ({
+  return rows.map((r) => ({
     timestamp: formatDate(r[idx.timestamp]),
     matchId: r[idx.matchId] || '',
     teamA: r[idx.teamA],
@@ -332,16 +369,22 @@ function getRecentMatches(limit = 10) {
   }));
 }
 
+/**
+ * シート取得：ID指定 > アクティブ > 新規作成
+ */
 function getSheet() {
+  /** スプレッドシート取得 */
   const ss = SPREADSHEET_ID
     ? SpreadsheetApp.openById(SPREADSHEET_ID)
     : SpreadsheetApp.getActiveSpreadsheet();
 
   if (!ss) {
+    // スタンドアロンでActiveが取れない場合は新規作成（B対策）
     const created = SpreadsheetApp.create('matches-data');
     return initAndGetSheet(created);
   }
 
+  /** 既存/新規シート */
   let sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
@@ -349,12 +392,18 @@ function getSheet() {
   return sheet;
 }
 
+/**
+ * 新規作成されたスプレッドシートにシートを用意
+ */
 function initAndGetSheet(ss) {
   const sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
   ensureHeader(sheet);
   return sheet;
 }
 
+/**
+ * ヘッダー行と書式を保証（C対策）
+ */
 function ensureHeader(sheet) {
   const lastColumn = sheet.getLastColumn();
   const headerNow = lastColumn ? sheet.getRange(1, 1, 1, lastColumn).getValues()[0] : [];
@@ -368,6 +417,9 @@ function ensureHeader(sheet) {
   }
 }
 
+/**
+ * ヘッダ→インデックスマップ
+ */
 function indexOf(header) {
   const map = {};
   header.forEach((name, i) => { map[name] = i; });
@@ -384,24 +436,29 @@ function indexOf(header) {
   };
 }
 
+/**
+ * チーム集計構造の初期化
+ */
 function ensureTeam(stats, team) {
   if (!stats[team]) {
     stats[team] = {
-      matchCount: 0,
-      wins: 0,
-      draws: 0,
-      losses: 0,
-      pointsFor: 0,
-      pointsAgainst: 0,
+      matchCount: 0, wins: 0, draws: 0, losses: 0,
+      pointsFor: 0, pointsAgainst: 0,
     };
   }
 }
 
+/**
+ * 日付整形（シートのタイムゾーンに合わせる）
+ */
 function formatDate(value) {
   if (!value) return '';
   return Utilities.formatDate(new Date(value), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm');
 }
 
+/**
+ * 行列値の取得（データが無い場合はヘッダーのみ返す）
+ */
 function safeGetValues(sheet) {
   const lastRow = sheet.getLastRow();
   const lastCol = Math.max(sheet.getLastColumn(), HEADERS.length);
@@ -409,10 +466,16 @@ function safeGetValues(sheet) {
   return sheet.getRange(1, 1, lastRow, lastCol).getValues();
 }
 
+/**
+ * ランキングキャッシュのクリア
+ */
 function clearRankingCache() {
   CacheService.getScriptCache().remove('ranking');
 }
 
+/**
+ * 一意なmatchId生成（時刻 + UUID切り出し）
+ */
 function makeMatchId(ts) {
   const t = Utilities.formatDate(ts, Session.getScriptTimeZone(), 'yyyyMMdd-HHmmss');
   return `${t}-${Utilities.getUuid().slice(0, 8)}`;
