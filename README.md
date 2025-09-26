@@ -46,9 +46,9 @@
    - カーリング本編はサンプルプロジェクト URL から開始（資料内に記載）
 
 4. **Google Apps Script / スプレッドシート**
-   - 対戦結果、進捗報告を記録するための Web アプリを Apps Script で作成
-   - スクリプトは README 末尾のコードを貼り付け、ウェブアプリとして公開
-   - デプロイ URL を各 HTML の `SCRIPT_URL` / `MATCH_SCRIPT_URL` に設定
+   - ライントレース進捗フォームとカーリング対戦フォームを受け付ける Web アプリを Apps Script で用意（同一スプレッドシート内でシートを分けても可）
+   - README 末尾に掲載した 2 種類のスクリプト（進捗ログ／対戦ログ）を貼り付け、ウェブアプリとして公開
+   - 発行した URL を `lesson-microbit-line.html` の `SCRIPT_URL`、`lesson-microbit-curling.html` の `MATCH_SCRIPT_URL` にそれぞれ設定
 
 ## Google Apps Script（対戦・進捗記録API）
 
