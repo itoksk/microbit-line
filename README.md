@@ -50,7 +50,124 @@
    - README 末尾に掲載した 2 種類のスクリプト（進捗ログ／対戦ログ）を貼り付け、ウェブアプリとして公開
    - 発行した URL を `lesson-microbit-line.html` の `SCRIPT_URL`、`lesson-microbit-curling.html` の `MATCH_SCRIPT_URL` にそれぞれ設定
 
-## Google Apps Script（対戦・進捗記録API）
+## Google Apps Script 連携
+
+授業内で利用するフォームは Google Apps Script で受け付けています。必要に応じて同じスプレッドシートを共有しつつシートを分け、以下のサンプルをコピーしてウェブアプリとして公開してください。
+
+### ライントレース進捗ログ API (`SCRIPT_URL`)
+
+`lesson-microbit-line.html` のクリア報告フォームから送信された内容を `line_clears` シートに保存し、最新 12 件とリーダーボード表示に利用します。ヘッダーは `timestamp|group|course|cleared` の順番です。
+
+```javascript
+const SHEET_NAME = 'line_clears';
+const SPREADSHEET_ID = '';  // 既存のスプレッドシートを使う場合は ID を指定
+const HEADERS = ['timestamp', 'group', 'course', 'cleared'];
+
+function doGet(e) {
+  const action = (e && e.parameter && e.parameter.action)
+    ? e.parameter.action.toLowerCase()
+    : 'read';
+  if (action !== 'read') {
+    return respond({ status: 'error', message: 'action=read を指定してください。' }, 400);
+  }
+  return respond({ status: 'success', records: getRecords() });
+}
+
+function doPost(e) {
+  const params = e && e.parameter ? e.parameter : {};
+  const group = sanitize(params.group);
+  const course = sanitize(params.course);
+  const cleared = sanitize(params.cleared || '1');
+
+  if (!group || !course) {
+    return respond({ status: 'error', message: 'group と course は必須です。' }, 400);
+  }
+
+  const sheet = getSheet();
+  ensureHeader(sheet);
+  sheet.appendRow([new Date(), group, course, cleared]);
+
+  return respond({ status: 'success' });
+}
+
+function getRecords() {
+  const sheet = getSheet();
+  ensureHeader(sheet);
+  const lastRow = sheet.getLastRow();
+  if (lastRow <= 1) return [];
+  const values = sheet.getRange(2, 1, lastRow - 1, HEADERS.length).getValues();
+  return values
+    .filter(row => row.some(cell => cell !== '' && cell !== null && cell !== undefined))
+    .map(row => ({
+      timestamp: formatDate(row[0]),
+      group: String(row[1] || ''),
+      course: String(row[2] || ''),
+      cleared: String(row[3] || ''),
+    }))
+    .reverse();
+}
+
+function getSheet() {
+  const ss = SPREADSHEET_ID
+    ? SpreadsheetApp.openById(SPREADSHEET_ID)
+    : SpreadsheetApp.getActiveSpreadsheet();
+
+  if (!ss) {
+    const created = SpreadsheetApp.create('line-clears-data');
+    return initSheet(created);
+  }
+
+  let sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_NAME);
+  }
+  ensureHeader(sheet);
+  return sheet;
+}
+
+function initSheet(ss) {
+  let sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_NAME);
+  }
+  ensureHeader(sheet);
+  return sheet;
+}
+
+function ensureHeader(sheet) {
+  const header = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0] || [];
+  const needs = HEADERS.some((name, index) => header[index] !== name);
+  if (needs) {
+    sheet.clear();
+    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+    sheet.setFrozenRows(1);
+    sheet.autoResizeColumns(1, HEADERS.length);
+  }
+}
+
+function sanitize(value) {
+  return String(value || '').trim();
+}
+
+function formatDate(value) {
+  if (!value) return '';
+  return Utilities.formatDate(new Date(value), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm');
+}
+
+function respond(body, statusCode) {
+  const output = ContentService
+    .createTextOutput(JSON.stringify(body))
+    .setMimeType(ContentService.MimeType.JSON);
+  if (statusCode) {
+    output.setStatusCode(statusCode);
+  }
+  return output;
+}
+```
+
+### カーリング対戦ログ API (`MATCH_SCRIPT_URL`)
+
+`lesson-microbit-curling.html` の対戦記録フォームでは勝敗とランキングを集計します。ヘッダーは `timestamp|matchId|teamA|teamB|scoreA|scoreB|winner|loser|notes` です。
 
 以下のコードを Google Apps Script に貼り付け、`matches` シート（ヘッダーは `timestamp|matchId|teamA|teamB|scoreA|scoreB|winner|loser|notes`）を自動生成できるようにします。リポジトリで使用している最新のデプロイ URL は `lesson-microbit-curling.html` の `MATCH_SCRIPT_URL` に記載されています。
 
@@ -307,7 +424,7 @@ function makeMatchId(ts) {
 1. Apps Script に上記を貼り付けて保存
 2. 「デプロイ」→「新しいデプロイ」→「種類: ウェブアプリ」
 3. 実行するユーザー: **自分** / アクセスできるユーザー: **全員（匿名含む）**
-4. 発行された URL を `lesson-microbit-curling.html` の `MATCH_SCRIPT_URL` に設定（進捗フォームを使う場合は `lesson-microbit-line.html` の `SCRIPT_URL` にも設定）
+4. 発行された URL を該当する HTML の定数に設定（ライン: `SCRIPT_URL` / カーリング: `MATCH_SCRIPT_URL`）
 
 ## 運用のヒント
 
