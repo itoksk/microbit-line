@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>micro:bit カーリング初級編｜戦略を立てて走らせよう</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700;900&family=Bebas+Neue&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --tech-blue: #0066CC;
+            --tech-cyan: #00A8CC;
+            --tech-dark: #001F3F;
+            --tech-gray: #2C3E50;
+            --tech-light: #ECF0F1;
+            --tech-accent: #FF6B35;
+            --paper-white: #F8F9FA;
+        }
+
+        body {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            background: var(--paper-white);
+            color: var(--tech-dark);
+            line-height: 1.8;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 102, 204, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 102, 204, 0.05) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 0 24px 120px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            padding: 56px 0 72px;
+            border-bottom: 3px solid var(--tech-blue);
+            margin-bottom: 72px;
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, transparent 100%);
+        }
+
+        .header-tag {
+            display: inline-block;
+            background: var(--tech-blue);
+            color: #fff;
+            padding: 6px 18px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 28px;
+            clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 100%, 12px 100%);
+        }
+
+        h1 {
+            font-size: clamp(48px, 8vw, 96px);
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 2px;
+            line-height: 0.92;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--tech-blue) 0%, var(--tech-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-subtitle {
+            font-size: 20px;
+            font-weight: 400;
+            color: var(--tech-gray);
+            letter-spacing: 4px;
+            margin-bottom: 32px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .header-description {
+            font-size: 16px;
+            color: var(--tech-gray);
+            max-width: 780px;
+        }
+
+        section {
+            margin-bottom: 88px;
+            position: relative;
+        }
+
+        .section-label {
+            position: absolute;
+            top: -36px;
+            left: -48px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 72px;
+            font-weight: 900;
+            color: rgba(0, 102, 204, 0.12);
+            pointer-events: none;
+        }
+
+        h2 {
+            font-size: 32px;
+            margin-bottom: 16px;
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        h3 {
+            font-size: 22px;
+            margin-bottom: 12px;
+            color: var(--tech-blue);
+        }
+
+        p {
+            margin-bottom: 16px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .info-card {
+            background: #fff;
+            border: 1px solid rgba(0, 102, 204, 0.12);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .info-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--tech-blue), var(--tech-cyan));
+            animation: gradientSlide 4s linear infinite;
+            background-size: 200% 100%;
+        }
+
+        .info-card:hover {
+            transform: translateX(8px);
+            box-shadow: 0 18px 36px rgba(0, 31, 63, 0.12);
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--tech-dark);
+            color: #fff;
+            padding: 4px 10px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            font-weight: 700;
+            clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%);
+            margin-bottom: 12px;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+        }
+
+        .image-panel {
+            background: #fff;
+            border: 1px solid rgba(0, 102, 204, 0.14);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .image-panel img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            box-shadow: 0 12px 24px rgba(0, 31, 63, 0.15);
+            margin-bottom: 12px;
+        }
+
+        .image-panel figcaption {
+            font-size: 13px;
+            color: var(--tech-gray);
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .practice-card {
+            border: 1px solid rgba(255, 107, 53, 0.35);
+            background: rgba(255, 107, 53, 0.08);
+            padding: 18px 22px;
+            margin-top: 20px;
+        }
+
+        .practice-card strong {
+            color: var(--tech-accent);
+        }
+
+        .submission-panel {
+            margin-top: 28px;
+            border: 1px solid rgba(0, 102, 204, 0.25);
+            background: rgba(0, 102, 204, 0.08);
+            padding: 20px 24px;
+        }
+
+        .submission-panel form {
+            display: grid;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .submission-panel label {
+            font-weight: 600;
+            color: var(--tech-dark);
+        }
+
+        .submission-panel input,
+        .submission-panel textarea {
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 102, 204, 0.35);
+            font-size: 14px;
+            background: #fff;
+        }
+
+        .submission-panel button {
+            justify-self: start;
+            padding: 10px 22px;
+            background: var(--tech-blue);
+            color: #fff;
+            border: none;
+            letter-spacing: 1px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .submission-panel button:hover {
+            transform: translateX(4px);
+            box-shadow: 0 10px 18px rgba(0, 102, 204, 0.2);
+        }
+
+        .submission-message {
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        .scoreboard {
+            margin-top: 28px;
+            background: #fff;
+            border: 1px solid rgba(0, 102, 204, 0.2);
+            padding: 20px 24px;
+        }
+
+        .scoreboard h3 {
+            margin-bottom: 12px;
+        }
+
+        .reload-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid var(--tech-blue);
+            background: transparent;
+            color: var(--tech-blue);
+            font-size: 13px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .reload-button:hover {
+            background: rgba(0, 102, 204, 0.08);
+        }
+
+        .reload-button[disabled] {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .leaderboard {
+            display: grid;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .leaderboard-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 16px;
+            border: 1px solid rgba(0, 102, 204, 0.18);
+            background: rgba(0, 102, 204, 0.08);
+            border-radius: 10px;
+        }
+
+        .leaderboard-card[data-level="top"] {
+            background: rgba(0, 168, 204, 0.12);
+            border-color: rgba(0, 168, 204, 0.35);
+        }
+
+        .leaderboard-card .rank-icon {
+            font-size: 24px;
+            width: 36px;
+            text-align: center;
+        }
+
+        .leaderboard-card .rank-body {
+            flex: 1;
+        }
+
+        .leaderboard-card .rank-body strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .leaderboard-card .rank-meta {
+            font-size: 12px;
+            color: var(--tech-gray);
+        }
+
+        .leaderboard-empty {
+            font-size: 14px;
+            color: var(--tech-gray);
+        }
+
+        .recent-title {
+            margin-top: 20px;
+            margin-bottom: 8px;
+            font-size: 16px;
+            color: var(--tech-dark);
+        }
+
+        .score-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 8px;
+        }
+
+        .score-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px dashed rgba(0, 102, 204, 0.2);
+            padding-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .concept-figure {
+            margin: 24px 0;
+            text-align: center;
+            background: #fff;
+            border: 1px solid rgba(0, 102, 204, 0.12);
+            padding: 20px;
+        }
+
+        .concept-figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 20px 40px rgba(0, 31, 63, 0.18);
+        }
+
+        .concept-figure figcaption {
+            font-size: 13px;
+            color: var(--tech-gray);
+            margin-top: 12px;
+        }
+
+        .code-block {
+            position: relative;
+            background: #0C1220;
+            color: #ECF0F1;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            background: rgba(0, 168, 204, 0.18);
+            border-bottom: 1px solid rgba(236, 240, 241, 0.1);
+        }
+
+        .code-title {
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+
+        pre {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            padding: 20px;
+            white-space: pre;
+        }
+
+        .script-snippet {
+            background: #0C1220;
+            color: #ECF0F1;
+            border-radius: 6px;
+            margin-top: 12px;
+            overflow-x: auto;
+        }
+
+        .script-snippet pre {
+            margin: 0;
+            padding: 16px 20px;
+            line-height: 1.6;
+        }
+
+        .copy-hint {
+            font-size: 13px;
+            color: rgba(236, 240, 241, 0.8);
+            margin-top: 10px;
+            padding: 0 16px 16px;
+        }
+
+        .copy-button {
+            background: transparent;
+            border: 1px solid rgba(236, 240, 241, 0.4);
+            color: #ECF0F1;
+            padding: 6px 12px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .copy-button:hover {
+            background: rgba(236, 240, 241, 0.08);
+        }
+
+        .hint-card {
+            border: 1px solid rgba(0, 102, 204, 0.25);
+            background: rgba(0, 102, 204, 0.12);
+            padding: 14px 18px;
+            margin-top: 18px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        details.advanced-snippet {
+            margin-top: 12px;
+        }
+
+        details.advanced-snippet summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--tech-blue);
+        }
+
+        details.advanced-snippet .code-block {
+            margin-top: 12px;
+        }
+
+        .stage-label {
+            display: inline-block;
+            background: var(--tech-cyan);
+            color: var(--tech-dark);
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 1px;
+            padding: 4px 10px;
+            clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 100%, 12px 100%);
+            margin-bottom: 10px;
+        }
+
+        ul.check-list {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        ul.check-list li {
+            position: relative;
+            padding-left: 22px;
+            margin-bottom: 10px;
+        }
+
+        ul.check-list li::before {
+            content: "✔";
+            position: absolute;
+            left: 0;
+            color: var(--tech-cyan);
+            font-size: 14px;
+        }
+
+        @keyframes gradientSlide {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+
+        @media (max-width: 720px) {
+            .section-label {
+                left: -20px;
+                font-size: 56px;
+            }
+
+            header {
+                padding: 40px 0 56px;
+                margin-bottom: 56px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-tag">MICRO:BIT CURLING</div>
+            <h1>Strategic Curling with micro:bit</h1>
+            <div class="header-subtitle">Plan • Code • Curl</div>
+            <p class="header-description">
+                カーリングのように<ruby>戦略<rt>せんりゃく</rt></ruby>を立て、micro:bit を走らせて<ruby>得点<rt>とくてん</rt></ruby>を競うワークショップの初級編ガイドです。<br>
+                MakeCode のブロックで<ruby>信号機<rt>しんごうき</rt></ruby>のシーケンス<ruby>制御<rt>せいぎょ</rt></ruby>（正しい<ruby>順番<rt>じゅんばん</rt></ruby>と<ruby>時間<rt>じかん</rt></ruby>）を<ruby>体験<rt>たいけん</rt></ruby>しながら、「どのような<ruby>組<rt>く</rt></ruby>み合わせが必要か」「<ruby>組<rt>く</rt></ruby>み合わせをどう<ruby>並<rt>なら</rt></ruby>べるか」を考えてコースを設計します。
+            </p>
+        </header>
+
+        <section>
+            <div class="section-label">01</div>
+            <h2>ワークショップの全体像</h2>
+            <div class="grid grid-2">
+                <div class="info-card">
+                    <span class="badge">INTRO</span>
+                    <h3><ruby>戦略<rt>せんりゃく</rt></ruby>と思考のウォームアップ</h3>
+                    <p>カーリングの試合づくりをヒントに、まずは「目標地点」「投げる<ruby>順番<rt>じゅんばん</rt></ruby>」「重ねたい動き」を紙に書き出します。クラス全体で<ruby>共有<rt>きょうゆう</rt></ruby>して、<ruby>成功<rt>せいこう</rt></ruby>イメージをつくりましょう。</p>
+                </div>
+                <div class="info-card">
+                    <span class="badge">FLOW</span>
+                    <h3>設計 → プログラム → 調整</h3>
+                    <p>1. ルール<ruby>理解<rt>りかい</rt></ruby> / 2. コース設計 / 3. サンプルの改造 / 4. <ruby>試走<rt>しそう</rt></ruby>と<ruby>軌道<rt>きどう</rt></ruby><ruby>修正<rt>しゅうせい</rt></ruby> / 5. <ruby>得点<rt>とくてん</rt></ruby>対決 の順に進めます。各ステップで役割を交代するとチーム全員が経験できます。</p>
+                </div>
+                <div class="info-card">
+                    <span class="badge">TEAM PLAY</span>
+                    <h3>役割リレーで集中力アップ</h3>
+                    <p>ストラテジスト（<ruby>戦略<rt>せんりゃく</rt></ruby>係）・プログラマ・テストマネージャーを回しながら、考える力と実装力の両方を磨きます。困ったらペア<ruby>同<rt>おな</rt></ruby>士でヒントを出し合いましょう。</p>
+                </div>
+            </div>
+            <div class="hint-card">
+                <strong>ポイント</strong><br>
+                戦略は 1 つだけでなく複数案を用意しよう。「速く行く」「確実に止まる」「相手のストーンを押し出す」など、狙いを分解して考えると組み合わせが見えてきます。
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">02</div>
+            <h2>じゃんけんプログラミングを<ruby>体験<rt>たいけん</rt></ruby>しよう</h2>
+            <p>micro:bitのボタンを使って、じゃんけんのグー・チョキ・パーを表示するプログラムを作ります。<strong>ボタン入力</strong>と<strong>LED表示</strong>の<ruby>基本<rt>きほん</rt></ruby>を学びながら、プログラミングの楽しさを<ruby>体験<rt>たいけん</rt></ruby>しましょう。</p>
+            
+            <div class="grid grid-2">
+                <div class="info-card">
+                    <span class="badge">BUTTON INPUT</span>
+                    <h3>ボタンで遊びを作る</h3>
+                    <ul class="check-list">
+                        <li>Aボタン → グー（石）のアイコンを表示</li>
+                        <li>Bボタン → チョキ（はさみ）のアイコンを表示</li>
+                        <li>A+Bボタン → パー（紙）のアイコンを表示</li>
+                    </ul>
+                    <p>ボタンを押すと、<ruby>対応<rt>たいおう</rt></ruby>するアイコンがLED画面に表示されます。<ruby>実際<rt>じっさい</rt></ruby>にじゃんけんで<ruby>対戦<rt>たいせん</rt></ruby>してみましょう。</p>
+                </div>
+                <div class="info-card">
+                    <span class="badge">TRY</span>
+                    <h3>じゃんけんプログラムを作ろう</h3>
+                    <p>MakeCodeエディタを使って、3つのボタンパターンに<ruby>対応<rt>たいおう</rt></ruby>するプログラムを作ります。まずはグーから作り、次にチョキ、最後にパーを<ruby>追<rt>お</rt></ruby>加していきましょう。</p>
+                    <p><ruby>完成<rt>かんせい</rt></ruby>したら、クラスメイトとじゃんけん<ruby>対戦<rt>たいせん</rt></ruby>！　誰が勝つか、<ruby>実際<rt>じっさい</rt></ruby>にボタンを押して確かめてください。</p>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 48px; margin-bottom: 24px;">プログラミングの<ruby>手順<rt>てじゅん</rt></ruby></h3>
+            
+            <div class="practice-card" style="margin-bottom: 32px;">
+                <p><strong>【ステップ1】ボタンブロックを<ruby>配置<rt>はいち</rt></ruby>する</strong></p>
+                <p>まず、「入力」カテゴリから「ボタンAが押されたとき」ブロックを画面に出します。このブロックが、ボタンを押したときに何かをする<ruby>命令<rt>めいれい</rt></ruby>の入れ物になります。</p>
+                <figure class="concept-figure">
+                    <img src="https://drive.google.com/thumbnail?id=1I4UJGB_6DNCsoq_XWvjswJZ-QwFhypaF&sz=w1000" alt="ボタン入力ブロックの場所">
+                    <figcaption>「入力」カテゴリに「ボタンAが押されたとき」ブロックがあります。これをワークスペースにドラッグしましょう。</figcaption>
+                </figure>
+            </div>
+
+            <div class="practice-card" style="margin-bottom: 32px;">
+                <p><strong>【ステップ2】LED表示ブロックを<ruby>追<rt>つい</rt></ruby>加する</strong></p>
+                <p>次に、「<ruby>基本<rt>きほん</rt></ruby>」カテゴリから「アイコンを表示」ブロックを<ruby>取<rt>と</rt></ruby>り出し、「ボタンAが押されたとき」ブロックの中に入れます。これで、ボタンを押したときにアイコンが表示されるようになります。</p>
+                <figure class="concept-figure">
+                    <img src="https://drive.google.com/thumbnail?id=1BxtSPxEO3f_8PCTNvV9d6L2wNMeMPZDv&sz=w1000" alt="LED表示ブロックの場所">
+                    <figcaption>「<ruby>基本<rt>きほん</rt></ruby>」カテゴリに「アイコンを表示」ブロックがあります。ここでグー・チョキ・パーのアイコンを選びます。</figcaption>
+                </figure>
+            </div>
+
+            <div class="practice-card" style="margin-bottom: 32px;">
+                <p><strong>【ステップ3】グー・チョキ・パーを作る</strong></p>
+                <ol style="margin-top: 12px;">
+                    <li>「アイコンを表示」ブロックをクリックして、グー（石）のアイコンを選ぶ</li>
+                    <li><ruby>同<rt>おな</rt></ruby>じ<ruby>手順<rt>てじゅん</rt></ruby>で「ボタンBが押されたとき」にチョキ（はさみ）を<ruby>設定<rt>せってい</rt></ruby></li>
+                    <li>「ボタンA+Bが押されたとき」にパー（紙）を<ruby>設定<rt>せってい</rt></ruby></li>
+                    <li>micro:bitにダウンロードして、<ruby>実際<rt>じっさい</rt></ruby>に試してみる！</li>
+                </ol>
+                <figure class="concept-figure" style="margin-top: 24px;">
+                    <img src="https://drive.google.com/thumbnail?id=1hWKcHXOtDSb17BUFW0D4qlB15g7fmg8T&sz=w1000" alt="グー・チョキ・パーの完成プログラム">
+                    <figcaption>3つのボタンパターンが<ruby>完成<rt>かんせい</rt></ruby>した<ruby>状態<rt>じょうたい</rt></ruby>。このように<ruby>並<rt>なら</rt></ruby>べれば、じゃんけんゲームの<ruby>完成<rt>かんせい</rt></ruby>です。</figcaption>
+                </figure>
+            </div>
+
+            <p>ボタンとアイコンの<ruby>組<rt>く</rt></ruby>み合わせを<ruby>理解<rt>りかい</rt></ruby>できたら、次はカーリングの走行プログラムに<ruby>挑戦<rt>ちょうせん</rt></ruby>します。ボタン入力の代わりに、モーターの動きを<ruby>順番<rt>じゅんばん</rt></ruby>に<ruby>制御<rt>せいぎょ</rt></ruby>していきます。</p>
+        </section>
+
+        <section>
+            <h2>micro:bit カーリングの<ruby>準備<rt>じゅんび</rt></ruby></h2>
+            <p><ruby>安全<rt>あんぜん</rt></ruby>に、<ruby>確実<rt>かくじつ</rt></ruby>に<ruby>準備<rt>じゅんび</rt></ruby>することが<ruby>戦略<rt>せんりゃく</rt></ruby><ruby>実行<rt>じっこう</rt></ruby>の第一歩。写真を見ながら<ruby>順番<rt>じゅんばん</rt></ruby>に行いましょう。</p>
+            <div class="image-grid">
+                <figure class="image-panel">
+                    <img src="https://drive.google.com/thumbnail?id=1X7nE2PuNZsGPwn-tcxqSVGgSNi98FIb2&sz=w1000" alt="micro:bit をスリットに差し込む手順">
+                    <figcaption>スリットへの正しい挿し方。向きを<ruby>確認<rt>かくにん</rt></ruby>して、端子がまっすぐ入るように優しく押し込みます。</figcaption>
+                </figure>
+                <figure class="image-panel">
+                    <img src="https://drive.google.com/thumbnail?id=1oadYCBh2dSMepBbQOZtYH0ocfqv5mC7-&sz=w1000" alt="プログラムのダウンロード手順">
+                    <figcaption>エディタから micro:bit へ書き込む<ruby>手順<rt>てじゅん</rt></ruby>。USB の接続とファイル転送を<ruby>順番<rt>じゅんばん</rt></ruby>に<ruby>確認<rt>かくにん</rt></ruby>しましょう。</figcaption>
+                </figure>
+                <figure class="image-panel">
+                    <img src="https://drive.google.com/thumbnail?id=1vfZXz39IwvzM7RZBi1Nw7ozx5D7p371C&sz=w1000" alt="電源スイッチのオンオフ">
+                    <figcaption>スイッチのオン・オフ<ruby>位置<rt>いち</rt></ruby>。走らせる直前まではオフで待機し、<ruby>準備<rt>じゅんび</rt></ruby>が整ったらオンに。</figcaption>
+                </figure>
+                <figure class="image-panel">
+                    <img src="https://drive.google.com/thumbnail?id=1Domf3ATavN79m4IyIKp-HXk3BknfkTe0&sz=w1000" alt="ダウンロード時の注意点">
+                    <figcaption>ダウンロード中にケーブルを抜かない・ファイル名を分かりやすくするなど、トラブル<ruby>防<rt>ふせ</rt></ruby>止のポイントを押さえよう。</figcaption>
+                </figure>
+            </div>
+            <div class="hint-card">
+                <strong><ruby>破損<rt>はそん</rt></ruby>を<ruby>防<rt>ふせ</rt></ruby>ぐには？</strong><br>
+                <img src="https://drive.google.com/thumbnail?id=1BYQHCJDDZsr3R3Y8DYJwEwqrXnc00YFU&sz=w1000" alt="破損の注意点" style="max-width: 520px; width: 100%; margin: 16px 0; border-radius: 8px; box-shadow: 0 12px 24px rgba(0, 31, 63, 0.18);"><br>
+                ケーブルを引っ張らない・ボードを持つときは両端を支える・持ち運ぶときは専用ケースへ。機材を大切に扱うことで、練習時間を最大化できます。
+            </div>
+        </section>
+            <div class="hint-card" style="margin-top: 24px; background: rgba(0, 102, 204, 0.05); border-color: rgba(0, 102, 204, 0.2);">
+                <strong>📚 画像の<ruby>引用元<rt>いんようもと</rt></ruby>：</strong><br>
+                カーリングの取り扱い、スイッチの場所、コートの説明に関する画像は、以下の公式リソースを参考にしています。<br>
+                • <a href="https://switch-education.com/documents/curling-doc.pdf" target="_blank" rel="noopener noreferrer">公式ハンドブック（PDF）</a><br>
+                • <a href="https://switch-education.com/products/curling-program/#program" target="_blank" rel="noopener noreferrer">公式プログラミング教材ページ</a><br>
+                • <a href="https://youtu.be/WQdS2x1H2oQ" target="_blank" rel="noopener noreferrer">公式YouTube動画</a>
+            </div>
+
+        <section>
+            <div class="section-label">04</div>
+            <h2>コートを<ruby>理解<rt>りかい</rt></ruby>し<ruby>得点<rt>とくてん</rt></ruby><ruby>戦略<rt>せんりゃく</rt></ruby>を立てよう</h2>
+            <p>ショットを<ruby>成功<rt>せいこう</rt></ruby>させるには、コートのどこに止めたいかをイメージすることが大切です。</p>
+            <figure class="concept-figure">
+                <img src="https://drive.google.com/thumbnail?id=1Y7VjWNrvVnXy_fICI8j4chz5wzWv7llD&sz=w1000" alt="カーリングコートの図">
+                <figcaption>ハウス（的）の中心に近いほど高<ruby>得点<rt>とくてん</rt></ruby>。サイドのガードゾーンも走行コース設計のヒントに。</figcaption>
+            </figure>
+            <h3><ruby>得点<rt>とくてん</rt></ruby><ruby>計算<rt>けいさん</rt></ruby>の流れ</h3>
+            <div class="score-grid">
+                <figure class="image-panel">
+                    <img src="https://drive.google.com/thumbnail?id=1QjMccZYrc6c6ZnXT1MorkhsOuCIcxPk8&sz=w1000" alt="得点計算ステップ1">
+                    <figcaption>① それぞれのストーン<ruby>位置<rt>いち</rt></ruby>を<ruby>確認<rt>かくにん</rt></ruby>し、中心に最も近いチームを<ruby>把握<rt>はあく</rt></ruby>します。</figcaption>
+                </figure>
+                <figure class="image-panel">
+                    <img src="https://drive.google.com/thumbnail?id=1aLiEAGy9fzLDRftcUN56QIDB9et8RecP&sz=w1000" alt="得点計算ステップ2">
+                    <figcaption>② 近い順に<ruby>並<rt>なら</rt></ruby>べ替え、相手に<ruby>追<rt>お</rt></ruby>い越されるまでの自チームストーン数を数えます。</figcaption>
+                </figure>
+                <figure class="image-panel">
+                    <img src="https://drive.google.com/thumbnail?id=1mta4aQcOWHBVYPYZV6dyUfMzobmUdNH0&sz=w1000" alt="得点計算ステップ3">
+                    <figcaption>③ 1 点ずつ<ruby>積<rt>つ</rt></ruby>み上げていくイメージで、<ruby>戦略<rt>せんりゃく</rt></ruby>と<ruby>結<rt>むす</rt></ruby>果を<ruby>結<rt>むす</rt></ruby>び付けます。</figcaption>
+                </figure>
+                <figure class="image-panel">
+                    <img src="https://drive.google.com/thumbnail?id=1fwmcY0jDD99RUKJomIXml1SBR-w4Cr9h&sz=w1000" alt="得点計算ステップ4">
+                    <figcaption>④ チームで振り返り、次のエンドで<ruby>優先<rt>ゆうせん</rt></ruby>すべき<ruby>狙<rt>ねら</rt></ruby>いを話し合いましょう。</figcaption>
+                </figure>
+            </div>
+            <div class="practice-card">
+                <strong>チャレンジ：</strong>2 チームのストーン位置を紙に描き、「何点差？」を説明してみよう。説明には「最も近いストーン」「次に近いストーン」が必ず登場するように意識してみてください。
+                <details class="advanced-snippet">
+                    <summary>解答例をみる</summary>
+                    <ul class="check-list">
+                        <li>ハウス中心に一番近いストーンをまず<ruby>確認<rt>かくにん</rt></ruby>する（この例では青）。</li>
+                        <li>相手より内側にある自チームのストーンを数えると 2 個なので 2 点。</li>
+                        <li>次のエンドに向けて、赤チームはセンターガードを置くなど守りのシーケンスを考える。</li>
+                    </ul>
+                </details>
+            </div>
+        </section>
+
+            <div class="hint-card" style="margin-top: 24px; background: rgba(0, 102, 204, 0.05); border-color: rgba(0, 102, 204, 0.2);">
+                <strong>📚 画像の<ruby>引用元<rt>いんようもと</rt></ruby>：</strong><br>
+                カーリングの取り扱い、スイッチの場所、コートの説明に関する画像は、以下の公式リソースを参考にしています。<br>
+                • <a href="https://switch-education.com/documents/curling-doc.pdf" target="_blank" rel="noopener noreferrer">公式ハンドブック（PDF）</a><br>
+                • <a href="https://switch-education.com/products/curling-program/#program" target="_blank" rel="noopener noreferrer">公式プログラミング教材ページ</a><br>
+                • <a href="https://youtu.be/WQdS2x1H2oQ" target="_blank" rel="noopener noreferrer">公式YouTube動画</a>
+            </div>
+        <section>
+            <div class="section-label">05</div>
+            <h2><ruby>戦略<rt>せんりゃく</rt></ruby>の<ruby>組<rt>く</rt></ruby>み合わせを考えよう</h2>
+            <p>ゴール地点に<ruby>届<rt>とど</rt></ruby>くまでの「<ruby>並<rt>なら</rt></ruby>べ方」を考えるのがカーリングの<ruby>醍醐味<rt>だいごみ</rt></ruby>。コースを<ruby>分割<rt>ぶんかつ</rt></ruby>し、<ruby>段階的<rt>だんかいてき</rt></ruby>に<ruby>最適化<rt>さいてきか</rt></ruby>します。</p>
+            <div class="grid grid-2">
+                <div class="info-card">
+                    <span class="stage-label">STRATEGY MAP</span>
+                    <h3>3 つの視点でプランを作成</h3>
+                    <ul class="check-list">
+                        <li>スタート直後：まっすぐ加速する？ すぐ曲げる？</li>
+                        <li>中盤：相手ストーンを避けるガードコースは？</li>
+                        <li>終盤：どの角度で減速してハウスに止める？</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <span class="stage-label">TEAM TALK</span>
+                    <h3>役割ごとの声かけ例</h3>
+                    <p>ストラテジスト：「次の 20cm で右へ、最後は 40cm でブレーキ」<br>
+                       プログラマ：「<ruby>速度<rt>そくど</rt></ruby> 60→40→20 の 3 段階で<ruby>再現<rt>さいげん</rt></ruby>してみよう」<br>
+                       テスト担当：「ラインから外れたら、どの区間を調整する？」</p>
+                </div>
+            </div>
+            <div class="practice-card">
+                <strong>チャレンジ：</strong>ハウス中央に置かれた相手ストーンを押し出し、自分のストーンを残す戦略を考えてみよう。加速・横移動・減速の順序を言葉で説明してから、擬似コードを書いてみてください。
+                <details class="advanced-snippet">
+                    <summary>擬似コード例をみる</summary>
+                    <ul class="check-list">
+                        <li>スタート：スピードを上げてストーンに勢いをつける。</li>
+                        <li>中盤：右タイヤを遅くするなどして相手ストーンの外側を回り込む。</li>
+                        <li>終盤：左タイヤを遅くして中心へ戻し、最後はブレーキ操作で押し出して停止。</li>
+                    </ul>
+                </details>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">06</div>
+            <h2>ベースプログラムを<ruby>理解<rt>りかい</rt></ruby>しよう</h2>
+            <p>MakeCode のサンプルプロジェクトを読み解き、<ruby>戦略<rt>せんりゃく</rt></ruby>に合わせてブロックの値を調整します。</p>
+            <figure class="concept-figure">
+                <img src="https://drive.google.com/thumbnail?id=1d0gJjFoQEUnVepcGwhhx0tMDZOkX-ffq&sz=w1000" alt="サンプルプログラムの画面">
+                <figcaption>コメントを頼りに、<ruby>速度<rt>そくど</rt></ruby>・<ruby>時間<rt>じかん</rt></ruby>・条件分岐のどこを触れば<ruby>戦略<rt>せんりゃく</rt></ruby>が<ruby>再現<rt>さいげん</rt></ruby>できるかを<ruby>確認<rt>かくにん</rt></ruby>しましょう。</figcaption>
+            </figure>
+            <div class="info-card">
+                <span class="badge">MAKECODE</span>
+                <h3>サンプルプロジェクトからスタート</h3>
+                <p><a href="https://makecode.microbit.org/_CWADH9euK5ti" target="_blank" rel="noopener noreferrer">カーリング用 MakeCode プロジェクト</a> を開き、「エディターで編集」をクリックするとブロックが読み込まれます。まずはそのまま<ruby>実行<rt>じっこう</rt></ruby>し、どの<ruby>順番<rt>じゅんばん</rt></ruby>でモーター<ruby>速度<rt>そくど</rt></ruby>が<ruby>変化<rt>へんか</rt></ruby>しているかを<ruby>確認<rt>かくにん</rt></ruby>しましょう。</p>
+                <ul class="check-list">
+                    <li>OPEN / MID / FINAL と名付けられたブロックの値を変更すると、直進・カーブ・減速のシーケンスが<ruby>変化<rt>へんか</rt></ruby>します。</li>
+                    <li>「モーターの<ruby>速度<rt>そくど</rt></ruby>を<ruby>設定<rt>せってい</rt></ruby>」ブロックで左右の値を変えると、カーブのきつさを調整できます。</li>
+                    <li><ruby>順番<rt>じゅんばん</rt></ruby>ごとに「一時停止 (ms)」ブロックを入れておくと、走行ログと比較しやすくなります。</li>
+                </ul>
+            </div>
+            <div class="practice-card">
+                <strong>チャレンジ：</strong>サンプルの「OPEN」の速度を 50 に下げ、「MID」の待ち時間を 520 ミリ秒に伸ばすとコースはどう変わるか？ チームで予測を書き出してから試走しよう。
+                <details class="advanced-snippet">
+                    <summary>予測のヒントを見る</summary>
+                    <ul class="check-list">
+                        <li>初速を抑えると、直進区間が短くなりガード付近で早めに曲がり始める。</li>
+                        <li>MID の<ruby>時間<rt>じかん</rt></ruby>を長くすると、右カーブ区間が広がり相手ストーンの外側を回り込みやすい。</li>
+                        <li>そのぶん FINAL での戻しが不足する可能性があるので、左右の<ruby>速度<rt>そくど</rt></ruby>差や待ち<ruby>時間<rt>じかん</rt></ruby>で微調整しよう。</li>
+                    </ul>
+                </details>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">07</div>
+            <h2><ruby>試走<rt>しそう</rt></ruby>と<ruby>軌道<rt>きどう</rt></ruby><ruby>修正<rt>しゅうせい</rt></ruby>のコツ</h2>
+            <p>テスト走行で得たデータを基に、数値を微調整します。スプレッドシートやホワイトボードにログを残すと振り返りが楽になります。</p>
+            <div class="image-grid">
+                <figure class="image-panel">
+                    <img src="https://drive.google.com/thumbnail?id=1ang8gvahWS5li-p2GxivuZuFnviCqiqx&sz=w1000" alt="軌道修正の例">
+                    <figcaption>ラインから外れたポイントを書き込み、<ruby>速度<rt>そくど</rt></ruby>・<ruby>時間<rt>じかん</rt></ruby>どちらを変えるか印を付けていきます。</figcaption>
+                </figure>
+                <figure class="image-panel">
+                    <img src="https://drive.google.com/thumbnail?id=1LmEpvL1omHjDURL5lKFlicJxUzwv7uV2&sz=w1000" alt="プログラムブロックの説明">
+                    <figcaption>MakeCode ブロックで編集する場合は、<ruby>速度<rt>そくど</rt></ruby>ブロックと一緒に「待ち<ruby>時間<rt>じかん</rt></ruby>」ブロックを<ruby>並<rt>なら</rt></ruby>べて調整しましょう。</figcaption>
+                </figure>
+            </div>
+            <div class="practice-card">
+                <strong>チャレンジ：</strong>テスト走行 3 回分のログを取り、「どの区間で右へ流れたか」「修正案は何か」を書き出してみよう。修正後のコードも記録に残すと次のチームがスムーズに引き継げます。
+                <details class="advanced-snippet">
+                    <summary>ログ記入例をみる</summary>
+                    <ul class="check-list">
+                        <li>Run1：MID の後半で右へずれた → 「MID の左モーター<ruby>速度<rt>そくど</rt></ruby>」を +8。</li>
+                        <li>Run2：FINAL で止まりきらない → 待ち<ruby>時間<rt>じかん</rt></ruby>を +80、左右の<ruby>速度<rt>そくど</rt></ruby>を -5。</li>
+                        <li>Run3：ハウス内で停止<ruby>成功<rt>せいこう</rt></ruby> → 次は OPEN の<ruby>速度<rt>そくど</rt></ruby>を +20 にして押し出し<ruby>戦略<rt>せんりゃく</rt></ruby>を試す。</li>
+                    </ul>
+                </details>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">08</div>
+            <h2>ゲーム<ruby>形式<rt>けいしき</rt></ruby>で<ruby>仕上<rt>しあ</rt></ruby>げよう</h2>
+            <p>全チームが 3 エンド戦を行い、<ruby>戦略<rt>せんりゃく</rt></ruby> → <ruby>実行<rt>じっこう</rt></ruby> → 振り返りのサイクルを<ruby>体験<rt>たいけん</rt></ruby>します。審判係も交代でチャレンジしてみましょう。</p>
+            <div class="grid grid-2">
+                <div class="info-card">
+                    <span class="badge">SCORING</span>
+                    <h3>審判係の進め方</h3>
+                    <p>① スロー後は必ずストーン<ruby>位置<rt>いち</rt></ruby>を写真やメモに記録。<br>② <ruby>得点<rt>とくてん</rt></ruby>表を更新しながら、誰が次のエンドでハンマー（最後の投球権）かを伝えます。<br>③ フェアプレイの声かけも審判の大切な役割です。</p>
+                </div>
+                <div class="info-card">
+                    <span class="badge">REFLECT</span>
+                    <h3>ふりかえりの質問カード</h3>
+                    <p>・予定通りに動いたステップはどこ？<br>・調整が必要だったのはどの<ruby>組<rt>く</rt></ruby>み合わせ？<br>・次に<ruby>挑戦<rt>ちょうせん</rt></ruby>したい<ruby>戦略<rt>せんりゃく</rt></ruby>は？ など、短<ruby>時間<rt>じかん</rt></ruby>で<ruby>共有<rt>きょうゆう</rt></ruby>できる問いを用意しておきましょう。</p>
+                </div>
+            </div>
+            <div class="practice-card">
+                <strong>チャレンジ：</strong>ストーンまでの距離カードを並べ替えて得点を数えるボードを作ろう。並べ替えの手順をホワイトボードに書いたら、同じ考え方で MakeCode の変数やリストブロックを組み合わせて簡単なスコアカウンターに挑戦してみても OK！
+                <details class="advanced-snippet">
+                    <summary>並べ替え手順のヒント</summary>
+                    <ul class="check-list">
+                        <li>自チームと相手チームの石の距離カードを小さい順に<ruby>並<rt>なら</rt></ruby>べる。</li>
+                        <li>中心に一番近いカードが相手になるまで、自チームのカードを 1 枚ずつ数える。</li>
+                        <li>数えた枚数が<ruby>得点<rt>とくてん</rt></ruby>。MakeCode で<ruby>自動<rt>じどう</rt></ruby>化するなら、繰り返しブロックと比較ブロックを使って<ruby>同<rt>おな</rt></ruby>じ<ruby>順番<rt>じゅんばん</rt></ruby>を<ruby>再現<rt>さいげん</rt></ruby>しよう。</li>
+                    </ul>
+                </details>
+            </div>
+            <div class="hint-card">
+                <strong>次のステップ</strong><br>
+                初級編が終わったら、ラインセンサーや距離センサーを追加して自動オートメーションに挑戦！ ハイブリッド戦略で得点を伸ばしてみましょう。
+            </div>
+        </section>
+
+        <section>
+            <div class="section-label">09</div>
+            <h2><ruby>対戦<rt>たいせん</rt></ruby><ruby>結<rt>むす</rt></ruby>果を<ruby>共有<rt>きょうゆう</rt></ruby>しよう</h2>
+            <p>試合が終わったら、どのチームと<ruby>対戦<rt>たいせん</rt></ruby>して何点だったのかをすぐに記録し、クラス全員でランキングを<ruby>確認<rt>かくにん</rt></ruby>しましょう。送信すると下のランキングが<ruby>自動<rt>じどう</rt></ruby>で更新されます。</p>
+            <div class="submission-panel">
+                <h3><ruby>対戦<rt>たいせん</rt></ruby><ruby>結<rt>むす</rt></ruby>果を送信</h3>
+                <form id="match-form">
+                    <label for="team-a">チームA（または先攻）</label>
+                    <input type="text" id="team-a" name="teamA" placeholder="例：Blue Penguins" required>
+
+                    <label for="team-b">チームB（または後攻）</label>
+                    <input type="text" id="team-b" name="teamB" placeholder="例：Red Rockets" required>
+
+                    <label for="score-a">チームAの得点</label>
+                    <input type="number" id="score-a" name="scoreA" min="0" placeholder="例：8" required>
+
+                    <label for="score-b">チームBの得点</label>
+                    <input type="number" id="score-b" name="scoreB" min="0" placeholder="例：6" required>
+
+                    <label for="notes">メモ（コース名・ハイライトなど / 任意）</label>
+                    <textarea id="notes" name="notes" rows="3" placeholder="例：コース2で逆転成功。ゴール演出◎"></textarea>
+
+                    <button type="submit">対戦結果を記録</button>
+                </form>
+                <div class="submission-message" id="match-message"></div>
+            </div>
+
+            <div class="scoreboard" id="match-scoreboard">
+                <h3>ランキング</h3>
+                <button type="button" class="reload-button" id="match-reload">最新のログを取得</button>
+                <div class="leaderboard" id="match-leaderboard">
+                    <p class="leaderboard-empty">読み込み中...</p>
+                </div>
+                <h4 class="recent-title">直近の対戦結果</h4>
+                <ul class="score-list" id="match-list">
+                    <li>読み込み中...</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        (function () {
+            var MATCH_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby4Cfd3qsb92YGmxj5kHY1knzgqCLIIKgib0xTMm6CLZFPOQgFVIb0Jk2NJH4jbRWWfkg/exec';
+
+            function copyCode(targetId) {
+                var codeBlock = document.getElementById(targetId);
+                if (!codeBlock) return;
+                var text = codeBlock.innerText;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).catch(function () {
+                        fallbackCopy(codeBlock, text);
+                    });
+                } else {
+                    fallbackCopy(codeBlock, text);
+                }
+            }
+
+            function fallbackCopy(codeBlock, text) {
+                var textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.setAttribute('readonly', '');
+                textarea.style.position = 'absolute';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.warn('コピーに失敗しました。手動で選択してください。');
+                }
+                document.body.removeChild(textarea);
+            }
+
+            function setMatchMessage(message, isError) {
+                var box = document.getElementById('match-message');
+                if (!box) return;
+                box.textContent = message;
+                box.style.color = isError ? '#c0392b' : '#0066CC';
+            }
+
+            function formatError(error) {
+                if (!error) return '不明なエラー';
+                if (typeof error === 'string') return error;
+                return error.message || String(error);
+            }
+
+            function toText(value) {
+                if (value === null || value === undefined) return '';
+                return String(value);
+            }
+
+            function setReloadState(isLoading) {
+                var button = document.getElementById('match-reload');
+                if (!button) return;
+                if (isLoading) {
+                    if (!button.dataset.originalText) {
+                        button.dataset.originalText = button.textContent;
+                    }
+                    button.textContent = '読み込み中...';
+                    button.disabled = true;
+                } else {
+                    button.disabled = false;
+                    if (button.dataset.originalText) {
+                        button.textContent = button.dataset.originalText;
+                    }
+                }
+            }
+
+            function buildLeaderboard(ranking) {
+                var board = document.getElementById('match-leaderboard');
+                if (!board) return;
+
+                if (!ranking || !ranking.length) {
+                    board.innerHTML = '<p class="leaderboard-empty">まだ<ruby>対戦<rt>たいせん</rt></ruby><ruby>結<rt>むす</rt></ruby>果がありません。</p>';
+                    return;
+                }
+
+                var html = ranking.map(function (item, index) {
+                    var icon = ['🥇', '🥈', '🥉'][index] || '🎯';
+                    var level = index < 3 ? 'top' : '';
+                    var record = item.wins + '勝 ' + item.draws + '分 ' + item.losses + '敗';
+                    var points = '勝ち点 ' + (item.points || 0);
+                    var diff = '得失点差 ' + (item.diff >= 0 ? '+' + item.diff : item.diff);
+                    return '<div class="leaderboard-card" data-level="' + level + '">' +
+                        '<div class="rank-icon">' + icon + '</div>' +
+                        '<div class="rank-body">' +
+                        '<strong>' + toText(item.team) + '</strong>' +
+                        '<div class="rank-meta">' + record + '｜' + points + '</div>' +
+                        '<div class="rank-meta">対戦数 ' + (item.matches || 0) + '｜' + diff + '</div>' +
+                        '</div>' +
+                        '</div>';
+                }).join('');
+
+                board.innerHTML = html;
+            }
+
+            function renderRecentMatches(matches) {
+                var list = document.getElementById('match-list');
+                if (!list) return;
+                list.innerHTML = '';
+
+                if (!matches || !matches.length) {
+                    list.innerHTML = '<li>まだ記録はありません。</li>';
+                    return;
+                }
+
+                matches.forEach(function (entry) {
+                    var li = document.createElement('li');
+                    var teams = document.createElement('span');
+                    teams.textContent = toText(entry.teamA) + ' ' + toText(entry.scoreA) + ' - ' + toText(entry.scoreB) + ' ' + toText(entry.teamB);
+                    var winner = document.createElement('span');
+                    winner.style.fontSize = '12px';
+                    winner.style.color = '#555';
+                    var winnerLabel = entry.winner && entry.winner !== 'draw' ? '勝者: ' + entry.winner : '引き分け';
+                    winner.textContent = winnerLabel + (entry.timestamp ? ' ｜ ' + entry.timestamp : '');
+                    li.appendChild(teams);
+                    li.appendChild(winner);
+                    list.appendChild(li);
+                });
+            }
+
+            function loadMatches(showStatus) {
+                if (!MATCH_SCRIPT_URL) {
+                    buildLeaderboard([]);
+                    renderRecentMatches([]);
+                    if (showStatus) {
+                        setMatchMessage('Apps Script のURLを設定してください。', true);
+                        setReloadState(false);
+                    }
+                    return;
+                }
+
+                if (showStatus) {
+                    setMatchMessage('ランキングを更新しています...', false);
+                    setReloadState(true);
+                }
+
+                fetch(MATCH_SCRIPT_URL + '?action=ranking')
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        buildLeaderboard(data.ranking || []);
+                        renderRecentMatches(data.recentMatches || []);
+                        if (showStatus) {
+                            setMatchMessage('最新の情報を読み込みました。', false);
+                            setReloadState(false);
+                        }
+                    })
+                    .catch(function (error) {
+                        buildLeaderboard([]);
+                        renderRecentMatches([]);
+                        if (showStatus) {
+                            setMatchMessage('情報を取得できませんでした。(' + formatError(error) + ')', true);
+                            setReloadState(false);
+                        }
+                    });
+            }
+
+            function submitMatch(event) {
+                event.preventDefault();
+                if (!MATCH_SCRIPT_URL) {
+                    setMatchMessage('Apps Script のURLを設定してください。', true);
+                    return;
+                }
+
+                var form = event.target;
+                var formData = new URLSearchParams();
+                formData.append('teamA', form.teamA.value.trim());
+                formData.append('teamB', form.teamB.value.trim());
+                formData.append('scoreA', form.scoreA.value.trim());
+                formData.append('scoreB', form.scoreB.value.trim());
+                formData.append('notes', form.notes.value.trim());
+
+                if (!form.teamA.value.trim() || !form.teamB.value.trim()) {
+                    setMatchMessage('チーム名を入力してください。', true);
+                    return;
+                }
+
+                setMatchMessage('送信中...', false);
+
+                fetch(MATCH_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(function (result) {
+                        if (result && result.status === 'success') {
+                            setMatchMessage('記録しました！', false);
+                            form.reset();
+                            buildLeaderboard(result.ranking || []);
+                            renderRecentMatches(result.recentMatches || []);
+                        } else {
+                            var message = (result && result.message) ? result.message : '送信に失敗しました。';
+                            setMatchMessage(message, true);
+                        }
+                    })
+                    .catch(function (error) {
+                        setMatchMessage('送信できませんでした。(' + formatError(error) + ')', true);
+                    });
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var buttons = document.querySelectorAll('.copy-button');
+                Array.prototype.forEach.call(buttons, function (button) {
+                    button.addEventListener('click', function () {
+                        var target = button.getAttribute('data-target');
+                        copyCode(target);
+                        button.textContent = 'COPIED!';
+                        setTimeout(function () {
+                            button.textContent = 'COPY';
+                        }, 1600);
+                    });
+                });
+
+                var matchForm = document.getElementById('match-form');
+                if (matchForm) {
+                    matchForm.addEventListener('submit', submitMatch);
+                }
+
+                var reloadButton = document.getElementById('match-reload');
+                if (reloadButton) {
+                    reloadButton.addEventListener('click', function () {
+                        loadMatches(true);
+                    });
+                }
+
+                if (document.getElementById('match-scoreboard')) {
+                    loadMatches();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
